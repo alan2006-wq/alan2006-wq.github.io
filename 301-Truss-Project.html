@@ -5,45 +5,9 @@
     <title>301 Truss Project</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <section class="data-section">
-        <div class="section-header">
-            <div>
-                <h3>Model Input Data</h3>
-                <p>Truss definition used for equilibrium, reaction forces, and buckling analysis</p>
-            </div>
-            <div class="data-badge">Statically Determinate ✓</div>
-        </div>
 
-        <div class="summary-bar">
-            <div class="summary-item">
-                <span class="label">Joints (J)</span>
-                <span class="value" id="sum-j">5</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Members (M)</span>
-                <span class="value" id="sum-m">7</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Equations</span>
-                <span class="value" id="sum-eq">10</span>
-            </div>
-            <div class="summary-item highlight">
-                <span class="label">Determinacy</span>
-                <span class="value">M = 2J − 3 ✓</span>
-            </div>
-        </div>
-
-        <div class="data-grid">
-            <div class="data-card"><h4>Connection Matrix C</h4><div id="matrix-c" class="matrix-wrap"></div></div>
-            <div class="data-card"><h4>Support Matrix Sx</h4><div id="matrix-sx" class="matrix-wrap"></div></div>
-            <div class="data-card"><h4>Support Matrix Sy</h4><div id="matrix-sy" class="matrix-wrap"></div></div>
-            <div class="data-card"><h4>Joint Coordinates</h4><div id="coords-table" class="matrix-wrap"></div></div>
-            <div class="data-card full-width"><h4>Load Vector L</h4><div id="vector-l" class="matrix-wrap"></div></div>
-        </div>
-    </section>
-</body>
-</html>
 <section class="data-section">
 
     <!-- HEADER -->
@@ -55,19 +19,19 @@
         <div class="data-badge">Statically Determinate ✓</div>
     </div>
 
-    <!-- MODEL SUMMARY (NEW - IMPORTANT FOR LAB) -->
+    <!-- SUMMARY -->
     <div class="summary-bar">
         <div class="summary-item">
             <span class="label">Joints (J)</span>
-            <span class="value" id="sum-j">5</span>
+            <span class="value">5</span>
         </div>
         <div class="summary-item">
             <span class="label">Members (M)</span>
-            <span class="value" id="sum-m">7</span>
+            <span class="value">7</span>
         </div>
         <div class="summary-item">
             <span class="label">Equations</span>
-            <span class="value" id="sum-eq">10</span>
+            <span class="value">10</span>
         </div>
         <div class="summary-item highlight">
             <span class="label">Determinacy</span>
@@ -121,3 +85,6 @@
     </div>
 
 </section>
+
+</body>
+</html>
