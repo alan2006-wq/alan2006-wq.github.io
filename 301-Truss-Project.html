@@ -1,90 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>301 Truss Project</title>
-    <link rel="stylesheet" href="style.css">
+    <title>EK301 Truss Designer - Spring 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; max-width: 900px; margin: auto; padding: 20px; background: #f4f4f4; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #003366; }
+        .input-group { margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        textarea { width: 100%; height: 80px; font-family: monospace; }
+        button { background: #003366; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0055aa; }
+        #results { margin-top: 20px; padding: 15px; background: #eef; border-left: 5px solid #003366; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+    </style>
 </head>
-
 <body>
 
-<section class="data-section">
+<div class="container">
+    <h1>EK301 Truss Analysis Tool</h1>
+    <p>Spring 2026 Specifications [cite: 501, 896]</p>
 
-    <!-- HEADER -->
-    <div class="section-header">
-        <div>
-            <h3>Model Input Data</h3>
-            <p>Truss definition used for equilibrium, reaction forces, and buckling analysis</p>
-        </div>
-        <div class="data-badge">Statically Determinate ✓</div>
+    <div class="input-group">
+        <label>Joint Locations (X, Y in inches):</label>
+        <p><small>Format: x1,y1; x2,y2; ... (Example: 0,0; 8,2; 30,0)</small></p>
+        <textarea id="jointsInput">0,0; 8,2; 30,0</textarea>
     </div>
 
-    <!-- SUMMARY -->
-    <div class="summary-bar">
-        <div class="summary-item">
-            <span class="label">Joints (J)</span>
-            <span class="value">5</span>
-        </div>
-        <div class="summary-item">
-            <span class="label">Members (M)</span>
-            <span class="value">7</span>
-        </div>
-        <div class="summary-item">
-            <span class="label">Equations</span>
-            <span class="value">10</span>
-        </div>
-        <div class="summary-item highlight">
-            <span class="label">Determinacy</span>
-            <span class="value">M = 2J − 3 ✓</span>
-        </div>
+    <div class="input-group">
+        <label>Member Connections (Joint IDs):</label>
+        <p><small>Format: J1,J2; J2,J3; ... (Indices start at 1)</small></p>
+        <textarea id="membersInput">1,2; 2,3; 1,3</textarea>
     </div>
 
-    <!-- DATA GRID -->
-    <div class="data-grid">
-
-        <div class="data-card">
-            <div class="card-header">
-                <h4>Connection Matrix C</h4>
-                <span class="matrix-size">5 × 7</span>
-            </div>
-            <div id="matrix-c" class="matrix-wrap"></div>
-        </div>
-
-        <div class="data-card">
-            <div class="card-header">
-                <h4>Support Matrix Sx</h4>
-                <span class="matrix-size">5 × 3</span>
-            </div>
-            <div id="matrix-sx" class="matrix-wrap"></div>
-        </div>
-
-        <div class="data-card">
-            <div class="card-header">
-                <h4>Support Matrix Sy</h4>
-                <span class="matrix-size">5 × 3</span>
-            </div>
-            <div id="matrix-sy" class="matrix-wrap"></div>
-        </div>
-
-        <div class="data-card">
-            <div class="card-header">
-                <h4>Joint Coordinates</h4>
-                <span class="matrix-size">5 × 2</span>
-            </div>
-            <div id="coords-table" class="matrix-wrap"></div>
-        </div>
-
-        <div class="data-card full-width">
-            <div class="card-header">
-                <h4>Load Vector L</h4>
-                <span class="matrix-size">10 × 1</span>
-            </div>
-            <div id="vector-l" class="matrix-wrap"></div>
-        </div>
-
+    <div class="input-group">
+        <label>Supports & Load:</label>
+        <p>Pin Joint ID: <input type="number" id="pinIdx" value="1"> 
+           Roller Joint ID: <input type="number" id="rollIdx" value="3"></p>
+        <p>Load Joint ID: <input type="number" id="loadIdx" value="2"> 
+           Load Magnitude (W in oz): <input type="number" id="loadVal" value="32"></p>
     </div>
 
-</section>
+    <button onclick="analyzeTruss()">Analyze Design</button>
 
+    <div id="results" style="display:none;">
+        <h2>Analysis Results</h2>
+        <div id="summary"></div>
+        <table id="memberTable">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Force (oz)</th>
+                    <th>Type</th>
+                    <th>Length (in)</th>
+                    <th>Buckling Limit (oz)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function analyzeTruss() {
+    try {
+        // 1. Parse Inputs
+        const joints = document.getElementById('jointsInput').value.trim().split(';').map(s => s.split(',').map(Number));
+        const members = document.getElementById('membersInput').value.trim().split(';').map(s => s.split(',').map(Number));
+        const P = parseInt(document.getElementById('pinIdx').value) - 1;
+        const R = parseInt(document.getElementById('rollIdx').value) - 1;
+        const L_idx = parseInt(document.getElementById('loadIdx').value) - 1;
+        const W = parseFloat(document.getElementById('loadVal').value);
+
+        const J = joints.length;
+        const M = members.length;
+
+        // 2. Validate M = 2J - 3 [cite: 574, 630]
+        if (M !== 2 * J - 3) {
+            alert(`Constraint Error: M must be 2J - 3. Current: M=${M}, J=${J}`);
+            return;
+        }
+
+        // 3. Construct Matrix A and Vector L [cite: 767, 769]
+        let A = math.zeros(2 * J, M + 3);
+        let LoadVec = math.zeros(2 * J, 1);
+        LoadVec._data[J + L_idx][0] = -W; // Vertical load at joint L_idx [cite: 713]
+
+        // Populate member coefficients in A [cite: 769, 771]
+        members.forEach((m, i) => {
+            const j1 = m[0] - 1;
+            const j2 = m[1] - 1;
+            const dx = joints[j2][0] - joints[j1][0];
+            const dy = joints[j2][1] - joints[j1][1];
+            const L = Math.sqrt(dx*dx + dy*dy);
+
+            // Joint 1 components
+            A._data[j1][i] = dx / L;
+            A._data[J + j1][i] = dy / L;
+            // Joint 2 components (opposite direction)
+            A._data[j2][i] = -dx / L;
+            A._data[J + j2][i] = -dy / L;
+        });
+
+        // Reaction Force Columns [cite: 690-707]
+        A._data[P][M] = 1;     // Sx (Pin x)
+        A._data[J + P][M + 1] = 1; // Sy (Pin y)
+        A._data[J + R][M + 2] = 1; // Sy (Roller y)
+
+        // 4. Solve T = -A^-1 * L 
+        const T = math.multiply(math.multiply(math.inv(A), LoadVec), -1);
+
+        // 5. Calculate Cost and Buckling [cite: 583, 897]
+        let totalLength = 0;
+        let outputRows = "";
+        let criticalW = Infinity;
+        let criticalMember = -1;
+
+        members.forEach((m, i) => {
+            const dx = joints[m[1]-1][0] - joints[m[0]-1][0];
+            const dy = joints[m[1]-1][1] - joints[m[0]-1][1];
+            const len = Math.sqrt(dx*dx + dy*dy);
+            totalLength += len;
+
+            const force = T._data[i][0];
+            const type = force < 0 ? "Compression (C)" : "Tension (T)";
+            
+            // Buckling Formula Spring 2026: F = 37.5 * (10/L)^2 [cite: 897, 901-904]
+            const F_buckle = 37.5 * Math.pow(10 / len, 2);
+            
+            // Critical Load Calculation [cite: 929-932]
+            if (force < 0) {
+                const failureW = (F_buckle / Math.abs(force)) * W;
+                if (failureW < criticalW) {
+                    criticalW = failureW;
+                    criticalMember = i + 1;
+                }
+            }
+
+            outputRows += `<tr><td>m${i+1}</td><td>${Math.abs(force).toFixed(3)}</td><td>${type}</td><td>${len.toFixed(2)}</td><td>${force < 0 ? F_buckle.toFixed(2) : '-'}</td></tr>`;
+        });
+
+        // Cost Formula: C = 1*L + 10*J 
+        const cost = (1 * totalLength) + (10 * J);
+
+        // 6. Display Results
+        document.getElementById('summary').innerHTML = `
+            <p><b>Total Cost:</b> $${cost.toFixed(2)} [cite: 583]</p>
+            <p><b>Total Material:</b> ${(totalLength/12).toFixed(2)} ft (Limit: 10 ft) </p>
+            <p><b>Theoretical Max Load:</b> ${criticalW.toFixed(2)} oz [cite: 911]</p>
+            <p><b>Critical Member:</b> m${criticalMember} [cite: 910]</p>
+            <p><b>Max Load/Cost Ratio:</b> ${(criticalW / cost).toFixed(4)} oz/$ [cite: 951]</p>
+        `;
+        document.querySelector('#memberTable tbody').innerHTML = outputRows;
+        document.getElementById('results').style.display = "block";
+
+    } catch (err) {
+        alert("Error in analysis: " + err.message);
+    }
+}
+</script>
 </body>
 </html>
