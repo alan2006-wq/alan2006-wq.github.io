@@ -8,209 +8,222 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:       #060c14;
-  --panel:    #0c1622;
-  --panel2:   #111e2e;
-  --border:   rgba(99,179,255,0.13);
-  --border2:  rgba(99,179,255,0.07);
-  --blue:     #3b9eff;
-  --blue-dim: rgba(59,158,255,0.15);
-  --red:      #ff4d6a;
-  --red-dim:  rgba(255,77,106,0.15);
-  --orange:   #f59e0b;
-  --orange-dim:rgba(245,158,11,0.12);
-  --green:    #22d3a5;
-  --green-dim:rgba(34,211,165,0.12);
-  --text:     #e2eeff;
-  --muted:    #6b8db5;
-  --mono:     'JetBrains Mono', monospace;
-  --sans:     'Syne', sans-serif;
+  --bg:        #060c14;
+  --panel:     #0c1622;
+  --panel2:    #111e2e;
+  --panel3:    #0a1520;
+  --border:    rgba(99,179,255,0.13);
+  --border2:   rgba(99,179,255,0.07);
+  --blue:      #3b9eff;
+  --blue-dim:  rgba(59,158,255,0.15);
+  --red:       #ff4d6a;
+  --red-dim:   rgba(255,77,106,0.15);
+  --orange:    #f59e0b;
+  --green:     #22d3a5;
+  --green-dim: rgba(34,211,165,0.12);
+  --purple:    #a855f7;
+  --purple-dim:rgba(168,85,247,0.15);
+  --text:      #e2eeff;
+  --muted:     #6b8db5;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Syne', sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
-
-/* ── LAYOUT ── */
 .app{display:flex;height:100vh;overflow:hidden}
-.sidebar{
-  width:360px;min-width:320px;
-  background:var(--panel);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  overflow:hidden;
-  position:relative;z-index:10;
-}
-.workspace{flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden}
 
 /* ── SIDEBAR ── */
-.sb-head{
-  padding:18px 20px 14px;
-  border-bottom:1px solid var(--border);
-  background:linear-gradient(135deg,rgba(59,158,255,0.08),transparent);
+.sidebar{
+  width:385px;min-width:340px;background:var(--panel);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;z-index:10;
 }
-.sb-head h1{font-size:1.05rem;font-weight:800;letter-spacing:.04em;color:var(--blue);line-height:1.2}
-.sb-head p{font-size:.7rem;color:var(--muted);font-family:var(--mono);margin-top:3px}
+.sb-head{
+  padding:14px 18px 11px;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(59,158,255,0.08),transparent);flex-shrink:0;
+}
+.sb-head h1{font-size:.95rem;font-weight:800;letter-spacing:.05em;color:var(--blue)}
+.sb-head p{font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-top:2px}
 
-.sb-tabs{display:flex;border-bottom:1px solid var(--border)}
+.sb-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
 .tab-btn{
-  flex:1;padding:8px 0;font-family:var(--mono);font-size:.68rem;font-weight:600;
+  flex:1;padding:7px 0;font-family:var(--mono);font-size:.58rem;font-weight:700;
   background:none;border:none;color:var(--muted);cursor:pointer;
   border-bottom:2px solid transparent;transition:.2s;letter-spacing:.06em;text-transform:uppercase;
 }
 .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blue-dim)}
+.tab-btn.tab-matrix.active{color:var(--purple);border-bottom-color:var(--purple);background:var(--purple-dim)}
 
-.tab-content{display:none;flex:1;overflow-y:auto;flex-direction:column}
+.tab-content{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0}
 .tab-content.active{display:flex}
+.tab-content::-webkit-scrollbar{width:3px}
+.tab-content::-webkit-scrollbar-thumb{background:var(--border)}
 
-.sb-section{padding:14px 16px;border-bottom:1px solid var(--border2)}
-.sb-label{font-family:var(--mono);font-size:.62rem;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.sb-label span{background:var(--blue-dim);border-radius:3px;padding:1px 6px;font-size:.6rem}
+.sb-section{padding:11px 14px;border-bottom:1px solid var(--border2);flex-shrink:0}
+.sb-label{
+  font-family:var(--mono);font-size:.57rem;color:var(--blue);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+}
+.sb-label-left{display:flex;align-items:center;gap:6px}
+.sb-badge{background:var(--blue-dim);border-radius:3px;padding:1px 5px;font-size:.56rem}
+.sb-label.purple{color:var(--purple)}
+.sb-label.purple .sb-badge{background:var(--purple-dim);color:var(--purple)}
 
 /* ── ITEM LISTS ── */
-.item-list{display:flex;flex-direction:column;gap:2px;max-height:140px;overflow-y:auto}
+.item-list{display:flex;flex-direction:column;gap:2px;max-height:120px;overflow-y:auto}
 .item-list::-webkit-scrollbar{width:3px}
 .item-list::-webkit-scrollbar-thumb{background:var(--border)}
 .item-row{
-  display:grid;align-items:center;gap:6px;
-  padding:5px 8px;background:var(--panel2);border-radius:4px;
-  font-family:var(--mono);font-size:.72rem;border:1px solid var(--border2);
-  transition:.15s;
+  display:grid;align-items:center;gap:4px;padding:4px 7px;
+  background:var(--panel2);border-radius:4px;font-family:var(--mono);font-size:.68rem;
+  border:1px solid var(--border2);transition:.15s;
 }
 .item-row:hover{border-color:var(--border);background:rgba(59,158,255,0.05)}
 .item-row.highlight{border-color:var(--red);background:var(--red-dim)}
-.j-row{grid-template-columns:28px 1fr 1fr 22px}
-.m-row{grid-template-columns:28px 1fr 1fr 22px}
-.badge{
-  font-size:.6rem;font-weight:700;padding:2px 5px;border-radius:3px;
-  font-family:var(--mono);letter-spacing:.05em;
-}
+.j-row{grid-template-columns:26px 1fr 1fr 18px}
+.m-row{grid-template-columns:26px 1fr 1fr 18px}
+.badge{font-size:.56rem;font-weight:700;padding:1px 4px;border-radius:3px;font-family:var(--mono)}
 .badge-t{background:rgba(59,158,255,0.2);color:var(--blue)}
 .badge-c{background:rgba(245,158,11,0.2);color:var(--orange)}
 .badge-crit{background:var(--red-dim);color:var(--red)}
-.del-btn{
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  font-size:.9rem;line-height:1;border-radius:3px;padding:1px 4px;transition:.15s;
-}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.82rem;border-radius:3px;padding:0 3px;transition:.15s}
 .del-btn:hover{background:var(--red-dim);color:var(--red)}
 
-/* ── INPUTS ── */
-.input-row{display:grid;gap:6px;margin-top:8px}
-.input-row.cols2{grid-template-columns:1fr 1fr}
-.input-row.cols3{grid-template-columns:1fr 1fr 1fr}
-.input-row.cols2a{grid-template-columns:1fr 1fr auto}
-input[type=number],select{
-  background:var(--panel2);border:1px solid var(--border);
-  color:var(--text);padding:6px 8px;border-radius:4px;
-  font-family:var(--mono);font-size:.73rem;width:100%;
+/* ── FORM ELEMENTS ── */
+.ig{display:grid;gap:5px;margin-top:6px}
+.ig.c2{grid-template-columns:1fr 1fr}
+.ig.c3{grid-template-columns:1fr 1fr 1fr}
+input[type=number],input[type=text],select,textarea{
+  background:var(--panel2);border:1px solid var(--border);color:var(--text);
+  padding:5px 7px;border-radius:4px;font-family:var(--mono);font-size:.7rem;width:100%;
   transition:.2s;outline:none;
 }
-input[type=number]:focus,select:focus{border-color:var(--blue);background:rgba(59,158,255,0.05)}
-input::placeholder{color:var(--muted)}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);background:rgba(59,158,255,0.05)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
 select option{background:#0c1622}
+textarea{resize:vertical;line-height:1.5}
+.field-lbl{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:3px}
 
 /* ── BUTTONS ── */
-.btn{
-  padding:7px 12px;border-radius:5px;font-family:var(--mono);font-weight:600;
-  font-size:.72rem;cursor:pointer;border:none;transition:.2s;letter-spacing:.04em;
-  text-transform:uppercase;
-}
-.btn-primary{background:var(--blue);color:#000}
-.btn-primary:hover{background:#5fb3ff;transform:translateY(-1px)}
-.btn-ghost{background:var(--blue-dim);color:var(--blue);border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(59,158,255,0.25)}
+.btn{padding:5px 10px;border-radius:5px;font-family:var(--mono);font-weight:700;font-size:.65rem;cursor:pointer;border:none;transition:.2s;letter-spacing:.04em;text-transform:uppercase}
+.btn-ghost {background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,158,255,.3)}
+.btn-ghost:hover{background:rgba(59,158,255,.25)}
+.btn-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+.btn-purple:hover{background:rgba(168,85,247,.28)}
+.btn-green {background:var(--green-dim);color:var(--green);border:1px solid rgba(34,211,165,.3)}
+.btn-green:hover{background:rgba(34,211,165,.25)}
 .btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,106,.2)}
 .btn-danger:hover{background:rgba(255,77,106,.3)}
 .btn-solve{
-  background:linear-gradient(135deg,var(--blue),#7c3aed);
-  color:white;font-size:.78rem;padding:10px;width:100%;
-  letter-spacing:.06em;border-radius:6px;
+  background:linear-gradient(135deg,var(--blue),#7c3aed);color:white;
+  font-size:.72rem;padding:9px;width:100%;letter-spacing:.06em;border-radius:6px;
+  border:none;cursor:pointer;transition:.2s;font-family:var(--mono);font-weight:700;
 }
 .btn-solve:hover{opacity:.9;transform:translateY(-1px)}
-.btn-solve:active{transform:translateY(0)}
-
-/* ── RESULTS PANEL ── */
-.results-panel{padding:12px 16px;flex:1;overflow-y:auto}
-.results-panel::-webkit-scrollbar{width:3px}
-.results-panel::-webkit-scrollbar-thumb{background:var(--border)}
-
-.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.metric{
-  background:var(--panel2);border:1px solid var(--border2);border-radius:6px;
-  padding:10px 12px;
+.btn-import{
+  background:linear-gradient(135deg,var(--purple),#2563eb);color:white;
+  font-size:.72rem;padding:9px;width:100%;letter-spacing:.06em;border-radius:6px;
+  border:none;cursor:pointer;transition:.2s;font-family:var(--mono);font-weight:700;
 }
-.metric-label{font-family:var(--mono);font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.metric-val{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--text);margin-top:3px}
-.metric-val.good{color:var(--green)}
-.metric-val.warn{color:var(--orange)}
-.metric-val.crit{color:var(--red)}
-.metric-sub{font-size:.6rem;color:var(--muted);margin-top:2px}
+.btn-import:hover{opacity:.9;transform:translateY(-1px)}
 
-.results-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.66rem}
-.results-table th{
-  color:var(--muted);text-transform:uppercase;font-size:.58rem;letter-spacing:.08em;
-  border-bottom:1px solid var(--border);padding:6px 4px;text-align:left;font-weight:600;
+/* ── MATRIX TAB ── */
+.vec-wrap{position:relative;margin-bottom:5px}
+.vec-tag{
+  position:absolute;top:50%;left:8px;transform:translateY(-50%);
+  font-family:var(--mono);font-size:.65rem;color:var(--purple);font-weight:700;
+  pointer-events:none;z-index:1;
 }
-.results-table td{padding:5px 4px;border-bottom:1px solid var(--border2);vertical-align:middle}
-.results-table tr.is-crit td{background:rgba(255,77,106,.05)}
-.results-table tr:hover td{background:var(--blue-dim)}
+.vec-in{padding-left:26px !important;background:var(--panel3) !important;border-color:rgba(168,85,247,.25) !important}
+.vec-in:focus{border-color:var(--purple) !important;background:rgba(168,85,247,.06) !important}
 
-/* ── CANVAS WORKSPACE ── */
-.canvas-header{
-  height:40px;background:var(--panel);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 16px;gap:12px;
-  font-family:var(--mono);font-size:.7rem;
+/* Member grid */
+.mgrid-wrap{max-height:195px;overflow-y:auto;border:1px solid rgba(168,85,247,.18);border-radius:5px;margin-top:5px}
+.mgrid-wrap::-webkit-scrollbar{width:3px}
+.mgrid-wrap::-webkit-scrollbar-thumb{background:rgba(168,85,247,.35)}
+.mgrid{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.68rem}
+.mgrid th{
+  background:rgba(168,85,247,.12);color:var(--purple);font-size:.56rem;
+  text-transform:uppercase;letter-spacing:.08em;padding:5px 6px;
+  border:1px solid rgba(168,85,247,.15);font-weight:700;text-align:center;
 }
-.det-badge{
-  padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;
-  letter-spacing:.05em;
+.mgrid td{padding:2px 3px;border:1px solid var(--border2);background:var(--panel3)}
+.mgrid tr:hover td{background:rgba(168,85,247,.06)}
+.mgrid .rn{text-align:center;color:var(--purple);font-weight:700;font-size:.62rem;padding:4px 5px;min-width:28px}
+.mgrid input{
+  background:transparent;border:none;color:var(--text);padding:3px 5px;
+  font-family:var(--mono);font-size:.68rem;width:100%;text-align:center;outline:none;
 }
-.det-valid{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,211,165,.3)}
-.det-invalid{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,106,.3)}
-.mode-hint{color:var(--muted);margin-left:auto}
+.mgrid input:focus{background:rgba(168,85,247,.12);border-radius:3px}
+.mgrid .dc{text-align:center;padding:1px}
 
-#canvas-wrap{
-  flex:1;position:relative;overflow:hidden;cursor:crosshair;
-  background-color:var(--bg);
+/* Status pills */
+.status-pill{font-family:var(--mono);font-size:.6rem;padding:5px 9px;border-radius:5px;margin-top:5px;line-height:1.5}
+.s-ok  {background:var(--green-dim);color:var(--green);border:1px solid rgba(34,211,165,.2)}
+.s-err {background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,106,.2)}
+.s-info{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,158,255,.2)}
+
+/* ── RESULTS ── */
+.rp{padding:10px 13px;flex:1;overflow-y:auto}
+.rp::-webkit-scrollbar{width:3px}
+.rp::-webkit-scrollbar-thumb{background:var(--border)}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:9px}
+.mc{background:var(--panel2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px}
+.ml{font-family:var(--mono);font-size:.53rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.mv{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--text);margin-top:2px}
+.mv.good{color:var(--green)}.mv.warn{color:var(--orange)}.mv.crit{color:var(--red)}
+.ms{font-size:.53rem;color:var(--muted);margin-top:1px}
+.rtable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.62rem}
+.rtable th{color:var(--muted);text-transform:uppercase;font-size:.54rem;letter-spacing:.07em;border-bottom:1px solid var(--border);padding:5px 3px;text-align:left;font-weight:600}
+.rtable td{padding:4px 3px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.rtable tr.is-crit td{background:rgba(255,77,106,.05)}
+.rtable tr:hover td{background:var(--blue-dim)}
+
+/* ── CANVAS ── */
+.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.cheader{
+  height:37px;background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 13px;gap:9px;font-family:var(--mono);font-size:.65rem;flex-shrink:0;
+}
+.dbadge{padding:2px 8px;border-radius:20px;font-size:.6rem;font-weight:700;letter-spacing:.05em}
+.dv{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,211,165,.3)}
+.di{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,106,.3)}
+.mhint{color:var(--muted);margin-left:auto;font-size:.6rem}
+#cw{
+  flex:1;overflow:hidden;cursor:crosshair;background-color:var(--bg);
   background-image:
-    radial-gradient(circle at 50% 50%, rgba(59,158,255,0.03) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%,rgba(59,158,255,.03) 0%,transparent 60%),
     linear-gradient(var(--border2) 1px,transparent 1px),
     linear-gradient(90deg,var(--border2) 1px,transparent 1px);
-  background-size:100% 100%, 30px 30px, 30px 30px;
+  background-size:100% 100%,30px 30px,30px 30px;
 }
-#trussCanvas{width:100%;height:100%;display:block}
+#tc{width:100%;height:100%;display:block}
+.mbar{
+  height:40px;background:var(--panel);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:5px;flex-shrink:0;
+}
+.mp{
+  padding:4px 10px;border-radius:20px;font-family:var(--mono);font-size:.62rem;
+  font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted);transition:.2s;
+}
+.mp.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(59,158,255,.4)}
+.mp:hover:not(.active){color:var(--text)}
+.msep{width:1px;height:16px;background:var(--border);margin:0 2px}
 
-/* ── MODE BAR ── */
-.mode-bar{
-  height:44px;background:var(--panel);border-top:1px solid var(--border);
-  display:flex;align-items:center;padding:0 12px;gap:8px;
+.tip{
+  position:fixed;background:var(--panel2);border:1px solid var(--border);border-radius:6px;
+  padding:4px 9px;font-family:var(--mono);font-size:.6rem;pointer-events:none;display:none;z-index:200;color:var(--text);
 }
-.mode-pill{
-  padding:5px 12px;border-radius:20px;font-family:var(--mono);font-size:.68rem;
-  font-weight:600;cursor:pointer;border:1px solid var(--border);
-  background:none;color:var(--muted);transition:.2s;letter-spacing:.04em;
-}
-.mode-pill.active{background:var(--blue-dim);color:var(--blue);border-color:rgba(59,158,255,.4)}
-.mode-pill:hover:not(.active){border-color:var(--border);color:var(--text)}
-.mode-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
-
-/* ── TOOLTIP ── */
-.tooltip{
-  position:fixed;background:var(--panel2);border:1px solid var(--border);
-  border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:.65rem;
-  pointer-events:none;display:none;z-index:100;color:var(--text);
-}
-
-/* ── SCROLLBAR GLOBAL ── */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
 </head>
 <body>
-<div class="tooltip" id="tooltip"></div>
-
+<div class="tip" id="tip"></div>
 <div class="app">
 
-<!-- ══ SIDEBAR ══ -->
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
 <aside class="sidebar">
   <div class="sb-head">
     <h1>EK301 TRUSS DESIGNER</h1>
@@ -218,39 +231,46 @@ select option{background:#0c1622}
   </div>
 
   <div class="sb-tabs">
-    <button class="tab-btn active" onclick="switchTab('design')">Design</button>
-    <button class="tab-btn" onclick="switchTab('loads')">Loads</button>
-    <button class="tab-btn" onclick="switchTab('results')">Results</button>
+    <button class="tab-btn active"     onclick="stab('design')">Design</button>
+    <button class="tab-btn"            onclick="stab('loads')">Loads</button>
+    <button class="tab-btn tab-matrix" onclick="stab('matrix')">Matrix</button>
+    <button class="tab-btn"            onclick="stab('results')">Results</button>
   </div>
 
   <!-- ── DESIGN TAB ── -->
   <div class="tab-content active" id="tab-design">
     <div class="sb-section">
-      <div class="sb-label">Joints <span id="joint-count">0</span></div>
-      <div class="item-list" id="joint-list"></div>
-      <div class="input-row cols3" style="margin-top:8px">
-        <input type="number" id="new-jx" placeholder="X (in)" step="0.5">
-        <input type="number" id="new-jy" placeholder="Y (in)" step="0.5">
-        <button class="btn btn-ghost" onclick="addJointManual()">Add</button>
+      <div class="sb-label">
+        <div class="sb-label-left">Joints <span class="sb-badge" id="jcount">0</span></div>
+      </div>
+      <div class="item-list" id="jlist"></div>
+      <div class="ig c3" style="margin-top:7px">
+        <input type="number" id="njx" placeholder="X (in)" step="0.5">
+        <input type="number" id="njy" placeholder="Y (in)" step="0.5">
+        <button class="btn btn-ghost" onclick="addJM()">Add</button>
       </div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-label">Members <span id="member-count">0</span></div>
-      <div class="item-list" id="member-list"></div>
-      <div class="input-row cols3" style="margin-top:8px">
-        <select id="new-m1"></select>
-        <select id="new-m2"></select>
+      <div class="sb-label">
+        <div class="sb-label-left">Members <span class="sb-badge" id="mcount">0</span></div>
+      </div>
+      <div class="item-list" id="mlist"></div>
+      <div class="ig c3" style="margin-top:7px">
+        <select id="nm1"></select><select id="nm2"></select>
         <button class="btn btn-ghost" onclick="addMember()">Link</button>
       </div>
     </div>
 
     <div class="sb-section" style="flex:1">
-      <div class="sb-label">Canvas Mode</div>
-      <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:.7rem;color:var(--muted)">
-        <div>🖱 <b style="color:var(--text)">Add Joint</b> — click canvas</div>
-        <div>🔗 <b style="color:var(--text)">Add Member</b> — click two joints</div>
-        <div>🗑 <b style="color:var(--text)">Delete</b> — use × buttons or Del mode</div>
+      <div class="sb-label"><div class="sb-label-left">Canvas Tips</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:.65rem;color:var(--muted)">
+        <span>🖱 <b style="color:var(--text)">Add Joint</b> mode — click canvas</span>
+        <span>🔗 <b style="color:var(--text)">Member</b> mode — click J1 then J2</span>
+        <span>✕ <b style="color:var(--text)">Delete</b> mode — click joint or member</span>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-purple" style="width:100%;font-size:.62rem" onclick="syncToMatrix()">⬆ Sync Canvas → Matrix Tab</button>
       </div>
     </div>
   </div>
@@ -258,709 +278,666 @@ select option{background:#0c1622}
   <!-- ── LOADS TAB ── -->
   <div class="tab-content" id="tab-loads">
     <div class="sb-section">
-      <div class="sb-label">Support Conditions</div>
-      <div class="input-row cols2" style="gap:10px">
-        <div>
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px">📌 Pin Joint</div>
-          <select id="pin-select"></select>
-        </div>
-        <div>
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px">⊙ Roller Joint</div>
-          <select id="roller-select"></select>
-        </div>
+      <div class="sb-label"><div class="sb-label-left">Support Conditions</div></div>
+      <div class="ig c2" style="gap:8px">
+        <div><div class="field-lbl">📌 Pin Joint</div><select id="pin-sel"></select></div>
+        <div><div class="field-lbl">⊙ Roller Joint</div><select id="roll-sel"></select></div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label"><div class="sb-label-left">External Load</div></div>
+      <div class="ig c2" style="gap:8px">
+        <div><div class="field-lbl">Load Joint</div><select id="load-sel"></select></div>
+        <div><div class="field-lbl">W Magnitude (oz)</div><input type="number" id="load-val" value="32" min="1"></div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label"><div class="sb-label-left">Spec Checks</div></div>
+      <div id="spec-checks" style="display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:.62rem"></div>
+    </div>
+    <div class="sb-section">
+      <button class="btn-solve" onclick="solve()">▶ SOLVE TRUSS</button>
+    </div>
+  </div>
+
+  <!-- ── MATRIX TAB ── -->
+  <div class="tab-content" id="tab-matrix">
+
+    <div class="sb-section">
+      <div class="sb-label purple"><div class="sb-label-left">① Joint Coordinate Vectors</div></div>
+      <p style="font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:7px">
+        Comma or space separated. Index position = joint number (1-based).
+      </p>
+      <div class="vec-wrap"><span class="vec-tag">X&nbsp;=</span>
+        <input type="text" class="vec-in" id="mX" placeholder="0, 10, 20, 30" oninput="mlv()">
+      </div>
+      <div class="vec-wrap"><span class="vec-tag">Y&nbsp;=</span>
+        <input type="text" class="vec-in" id="mY" placeholder="0, 0, 0, 0" oninput="mlv()">
+      </div>
+      <div id="vec-st" class="status-pill s-info">Enter X and Y vectors above.</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label purple">
+        <div class="sb-label-left">② Member Connections <span class="sb-badge" id="mmc">0 rows</span></div>
+        <button class="btn btn-purple" style="padding:2px 7px;font-size:.56rem" onclick="mAddRow()">+ Row</button>
+      </div>
+      <p style="font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:5px">
+        One member per row. Enter 1-based joint indices.
+      </p>
+      <div class="mgrid-wrap">
+        <table class="mgrid">
+          <thead><tr><th>m#</th><th>Joint 1</th><th>Joint 2</th><th></th></tr></thead>
+          <tbody id="mgbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:6px">
+        <button class="btn btn-purple" style="flex:1;font-size:.6rem" onclick="mAddRow()">+ Add Member Row</button>
+        <button class="btn btn-danger" style="font-size:.6rem" onclick="mClear()">Clear</button>
       </div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-label">External Load</div>
-      <div class="input-row cols2" style="gap:10px">
-        <div>
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px">Load Joint</div>
-          <select id="load-joint-select"></select>
-        </div>
-        <div>
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px">Magnitude (oz)</div>
-          <input type="number" id="load-value" value="32" min="1">
-        </div>
+      <div class="sb-label purple"><div class="sb-label-left">③ Supports &amp; Load</div></div>
+      <div class="ig c2" style="gap:6px">
+        <div><div class="field-lbl">📌 Pin joint #</div>
+             <input type="number" id="m-pin" value="1" min="1" oninput="mlv()"></div>
+        <div><div class="field-lbl">⊙ Roller joint #</div>
+             <input type="number" id="m-roll" value="" min="1" oninput="mlv()"></div>
+        <div><div class="field-lbl">↓ Load joint #</div>
+             <input type="number" id="m-lj" value="" min="1" oninput="mlv()"></div>
+        <div><div class="field-lbl">W (oz)</div>
+             <input type="number" id="m-W" value="32" min="1"></div>
       </div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-label">Specifications Check</div>
-      <div id="spec-checks" style="display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:.68rem"></div>
+      <div id="mat-st" class="status-pill s-info">Fill in all fields, then import.</div>
+      <div style="display:flex;gap:6px;margin-top:7px">
+        <button class="btn-import" onclick="matImport()" style="flex:2">⬇ Import &amp; Solve</button>
+        <button class="btn btn-ghost" onclick="matPreview()" style="flex:1;font-size:.6rem">Preview</button>
+      </div>
+      <div style="margin-top:5px">
+        <button class="btn btn-green" style="width:100%;font-size:.62rem" onclick="syncToMatrix()">⬆ Sync Canvas → Matrix</button>
+      </div>
     </div>
 
-    <div class="sb-section" style="margin-top:auto">
-      <button class="btn btn-solve" onclick="runAnalysis()">▶ SOLVE TRUSS</button>
+    <div class="sb-section" style="flex:1">
+      <div class="sb-label purple"><div class="sb-label-left">Quick Templates</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn btn-purple" style="width:100%;font-size:.6rem;text-align:left;padding:5px 9px" onclick="matTpl('tri')">▸ 3-Joint Triangle (easy verify)</button>
+        <button class="btn btn-purple" style="width:100%;font-size:.6rem;text-align:left;padding:5px 9px" onclick="matTpl('p5')">▸ 5-Joint Pratt-style (span 30")</button>
+        <button class="btn btn-purple" style="width:100%;font-size:.6rem;text-align:left;padding:5px 9px" onclick="matTpl('full')">▸ 7-Joint Full Example</button>
+        <button class="btn btn-purple" style="width:100%;font-size:.6rem;text-align:left;padding:5px 9px" onclick="matTpl('warren')">▸ Warren Truss (9J / 15M)</button>
+      </div>
     </div>
   </div>
 
   <!-- ── RESULTS TAB ── -->
   <div class="tab-content" id="tab-results">
-    <div class="results-panel">
-      <div class="metric-grid" id="metric-grid">
-        <div class="metric"><div class="metric-label">Max Load</div><div class="metric-val" id="r-maxload">—</div><div class="metric-sub">oz theoretical</div></div>
-        <div class="metric"><div class="metric-label">Critical Member</div><div class="metric-val crit" id="r-crit">—</div><div class="metric-sub">buckles first</div></div>
-        <div class="metric"><div class="metric-label">Total Cost</div><div class="metric-val" id="r-cost">—</div><div class="metric-sub">C = L + 10·J</div></div>
-        <div class="metric"><div class="metric-label">Load/Cost</div><div class="metric-val good" id="r-ratio">—</div><div class="metric-sub">oz / unit</div></div>
-        <div class="metric"><div class="metric-label">Total Length</div><div class="metric-val" id="r-length">—</div><div class="metric-sub">inches (max 120)</div></div>
-        <div class="metric"><div class="metric-label">Uncertainty</div><div class="metric-val warn" id="r-uncert">—</div><div class="metric-sub">±Ufit = ±10 oz</div></div>
+    <div class="rp">
+      <div class="mg">
+        <div class="mc"><div class="ml">Max Load</div><div class="mv" id="r-ml">—</div><div class="ms">oz theoretical</div></div>
+        <div class="mc"><div class="ml">Critical Member</div><div class="mv crit" id="r-cm">—</div><div class="ms">buckles first</div></div>
+        <div class="mc"><div class="ml">Total Cost</div><div class="mv" id="r-co">—</div><div class="ms">C = L + 10·J</div></div>
+        <div class="mc"><div class="ml">Load / Cost</div><div class="mv good" id="r-lc">—</div><div class="ms">oz / unit</div></div>
+        <div class="mc"><div class="ml">Total Length</div><div class="mv" id="r-le">—</div><div class="ms">inches (≤120)</div></div>
+        <div class="mc"><div class="ml">Uncertainty</div><div class="mv warn" id="r-un">—</div><div class="ms">±Ufit=±10 oz</div></div>
       </div>
-      <div class="sb-label" style="margin-bottom:8px">Member Forces</div>
-      <table class="results-table">
-        <thead><tr>
-          <th>Member</th><th>Length</th><th>Force(oz)</th><th>T/C</th><th>Pcrit(oz)</th>
-        </tr></thead>
-        <tbody id="results-tbody"></tbody>
+      <div class="sb-label" style="margin-bottom:5px"><div class="sb-label-left">Member Forces</div></div>
+      <table class="rtable">
+        <thead><tr><th>Member</th><th>Len"</th><th>Force oz</th><th>T/C</th><th>Pcrit oz</th></tr></thead>
+        <tbody id="rtbody"></tbody>
       </table>
-      <div style="margin-top:12px" class="sb-label">Reaction Forces</div>
-      <table class="results-table" style="margin-top:6px">
+      <div style="margin-top:9px" class="sb-label"><div class="sb-label-left">Reaction Forces</div></div>
+      <table class="rtable" style="margin-top:4px">
         <thead><tr><th>Reaction</th><th>Value (oz)</th></tr></thead>
-        <tbody id="reactions-tbody"></tbody>
+        <tbody id="rxbody"></tbody>
       </table>
     </div>
   </div>
 </aside>
 
-<!-- ══ WORKSPACE ══ -->
+<!-- ════════════════════ WORKSPACE ════════════════════ -->
 <main class="workspace">
-  <div class="canvas-header">
-    <div id="det-badge" class="det-badge det-invalid">M = 2J − 3 ?</div>
-    <span id="mj-info" style="font-family:var(--mono);font-size:.65rem;color:var(--muted)"></span>
-    <span class="mode-hint" id="mode-hint">Click canvas to add joint</span>
+  <div class="cheader">
+    <div id="dbadge" class="dbadge di">M = 2J − 3 ?</div>
+    <span id="mjinfo" style="font-family:var(--mono);font-size:.6rem;color:var(--muted)"></span>
+    <span class="mhint" id="mhint">Click canvas to add joint</span>
   </div>
-
-  <div id="canvas-wrap">
-    <canvas id="trussCanvas"></canvas>
-  </div>
-
-  <div class="mode-bar">
-    <button class="mode-pill active" id="mode-joint" onclick="setMode('joint')">+ Joint</button>
-    <button class="mode-pill" id="mode-member" onclick="setMode('member')">⟳ Member</button>
-    <button class="mode-pill" id="mode-delete" onclick="setMode('delete')">✕ Delete</button>
-    <div class="mode-sep"></div>
-    <button class="mode-pill" onclick="clearAll()" style="color:var(--red)">Clear All</button>
-    <button class="mode-pill" onclick="loadExample()" style="margin-left:auto">Load Example</button>
+  <div id="cw"><canvas id="tc"></canvas></div>
+  <div class="mbar">
+    <button class="mp active" id="mode-joint"  onclick="setMode('joint')">+ Joint</button>
+    <button class="mp"        id="mode-member" onclick="setMode('member')">⟳ Member</button>
+    <button class="mp"        id="mode-delete" onclick="setMode('delete')">✕ Delete</button>
+    <div class="msep"></div>
+    <button class="mp" onclick="clearAll()" style="color:var(--red)">Clear All</button>
+    <button class="mp" onclick="loadEx()" style="margin-left:auto">Load Example</button>
   </div>
 </main>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════════════════
-let joints = [];
-let members = [];
-let nextJid = 1, nextMid = 1;
-let currentMode = 'joint';   // 'joint' | 'member' | 'delete'
-let memberFirstJoint = null; // for member mode: first selected joint
-let lastForces = [];
-let lastCritIdx = -1;
-let lastLens = [];
+// ─────────── STATE ───────────
+let joints=[], members=[];
+let nJid=1, nMid=1;
+let mode='joint', mFirst=null;
+let LF=[], LCi=-1, LLen=[];
+let matRid=0;
 
-// ══════════════════════════════════════════════════════════════════
-// UI HELPERS
-// ══════════════════════════════════════════════════════════════════
-function switchTab(name){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    const names=['design','loads','results'];
-    b.classList.toggle('active', names[i]===name);
-  });
+// ─────────── TAB SWITCH ───────────
+function stab(n){
+  const names=['design','loads','matrix','results'];
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',names[i]===n));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('tab-'+n).classList.add('active');
+  if(n==='matrix') mlv();
 }
 
+// ─────────── CANVAS MODE ───────────
 function setMode(m){
-  currentMode = m;
-  memberFirstJoint = null;
-  document.querySelectorAll('.mode-pill[id^=mode]').forEach(b=>b.classList.remove('active'));
-  const el = document.getElementById('mode-'+m);
-  if(el) el.classList.add('active');
-  const hints = {
-    joint:'Click canvas to place a joint (snaps to 0.5" grid)',
-    member:'Click a joint, then another to connect them',
-    delete:'Click a joint or member to delete it'
-  };
-  document.getElementById('mode-hint').textContent = hints[m] || '';
+  mode=m; mFirst=null;
+  document.querySelectorAll('.mp[id^=mode]').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('mode-'+m); if(el) el.classList.add('active');
+  document.getElementById('mhint').textContent={
+    joint:'Click canvas to place a joint (snaps to 0.5")',
+    member:'Click first joint, then second joint to connect',
+    delete:'Click any joint or member to delete it'
+  }[m]||'';
   draw();
 }
 
-// ══════════════════════════════════════════════════════════════════
-// JOINT / MEMBER MANAGEMENT
-// ══════════════════════════════════════════════════════════════════
-function addJoint(x, y){
-  const id = nextJid++;
-  joints.push({id, x: +x.toFixed(2), y: +y.toFixed(2)});
-  updateUI();
+// ─────────── CRUD ───────────
+function addJoint(x,y){joints.push({id:nJid++,x:+x.toFixed(2),y:+y.toFixed(2)});ui();}
+function addJM(){
+  const x=parseFloat(document.getElementById('njx').value);
+  const y=parseFloat(document.getElementById('njy').value);
+  if(!isNaN(x)&&!isNaN(y)) addJoint(x,y);
 }
-
-function addJointManual(){
-  const x = parseFloat(document.getElementById('new-jx').value);
-  const y = parseFloat(document.getElementById('new-jy').value);
-  if(isNaN(x)||isNaN(y)) return;
-  addJoint(x,y);
-}
-
 function removeJoint(id){
-  joints = joints.filter(j=>j.id!==id);
-  members = members.filter(m=>m.j1!==id&&m.j2!==id);
-  updateUI();
+  joints=joints.filter(j=>j.id!==id);
+  members=members.filter(m=>m.j1!==id&&m.j2!==id);
+  ui();
 }
-
-function addMember(j1id, j2id){
-  if(j1id===undefined){
-    j1id = parseInt(document.getElementById('new-m1').value);
-    j2id = parseInt(document.getElementById('new-m2').value);
+function addMember(j1,j2){
+  if(j1===undefined){
+    j1=parseInt(document.getElementById('nm1').value);
+    j2=parseInt(document.getElementById('nm2').value);
   }
-  if(j1id===j2id) return;
-  if(members.some(m=>(m.j1===j1id&&m.j2===j2id)||(m.j1===j2id&&m.j2===j1id))) return;
-  members.push({id:nextMid++, j1:j1id, j2:j2id});
-  updateUI();
+  if(j1===j2) return;
+  if(members.some(m=>(m.j1===j1&&m.j2===j2)||(m.j1===j2&&m.j2===j1))) return;
+  members.push({id:nMid++,j1,j2}); ui();
 }
-
-function removeMember(id){
-  members = members.filter(m=>m.id!==id);
-  updateUI();
-}
-
+function removeMember(id){members=members.filter(m=>m.id!==id);ui();}
 function clearAll(){
-  joints=[]; members=[]; nextJid=1; nextMid=1;
-  lastForces=[]; lastCritIdx=-1; lastLens=[];
-  resetResults();
-  updateUI();
+  joints=[];members=[];nJid=1;nMid=1;LF=[];LCi=-1;LLen=[];
+  resetRes();ui();
 }
 
-function loadExample(){
-  clearAll();
-  // A nice 7-joint Pratt-style truss spanning 30 inches, load joint at y=2
-  // Joints: pin at (0,0), roller at (30,0), load at (15,2)
-  const pts = [[0,0],[10,0],[20,0],[30,0],[5,2],[15,2],[25,2]];
-  pts.forEach(([x,y])=>addJoint(x,y));
-  // members
-  const conn = [
-    [1,2],[2,3],[3,4],    // bottom chord
-    [5,6],[6,7],          // top chord
-    [1,5],[5,2],[2,6],[6,3],[3,7],[7,4]  // diagonals/verticals
-  ];
-  conn.forEach(([a,b])=>addMember(a,b));
-  // set supports / load
-  document.getElementById('pin-select').value = 1;
-  document.getElementById('roller-select').value = 4;
-  document.getElementById('load-joint-select').value = 6;
-  document.getElementById('load-value').value = 32;
-  updateUI();
-}
+// ─────────── UI UPDATE ───────────
+function ui(){
+  const J=joints.length,M=members.length,det=M===2*J-3&&J>=3;
+  const db=document.getElementById('dbadge');
+  db.className='dbadge '+(det?'dv':'di');
+  db.textContent=det?`✓ M=2J−3 (M=${M})`:`M=${M}, need ${Math.max(0,2*J-3)}`;
+  document.getElementById('mjinfo').textContent=`J=${J}  M=${M}`;
+  document.getElementById('jcount').textContent=J;
+  document.getElementById('mcount').textContent=M;
 
-// ══════════════════════════════════════════════════════════════════
-// UPDATE UI LISTS & DROPDOWNS
-// ══════════════════════════════════════════════════════════════════
-function updateUI(){
-  const J = joints.length, M = members.length;
-  const det = (M === 2*J-3) && J>=3;
-
-  // determinacy badge
-  const badge = document.getElementById('det-badge');
-  badge.className = 'det-badge ' + (det ? 'det-valid' : 'det-invalid');
-  badge.textContent = det
-    ? `✓ M = 2J−3 (M=${M})`
-    : `M=${M}, need ${Math.max(0,2*J-3)} (2J−3)`;
-  document.getElementById('mj-info').textContent = `J=${J}  M=${M}`;
-
-  // joint count
-  document.getElementById('joint-count').textContent = J;
-  document.getElementById('member-count').textContent = M;
-
-  // joint list
-  document.getElementById('joint-list').innerHTML = joints.map(j=>`
+  // Joint list
+  document.getElementById('jlist').innerHTML=joints.map(j=>`
     <div class="item-row j-row">
       <span style="color:var(--blue);font-weight:700">J${j.id}</span>
-      <span>${j.x}"</span>
-      <span>${j.y}"</span>
+      <span>${j.x}"</span><span>${j.y}"</span>
       <button class="del-btn" onclick="removeJoint(${j.id})">×</button>
     </div>`).join('');
 
-  // member list — show forces if available
-  document.getElementById('member-list').innerHTML = members.map((m,i)=>{
-    const isCrit = (i===lastCritIdx);
-    const hasF = lastForces.length>i;
-    const f = hasF ? lastForces[i] : null;
-    const fStr = f!==null ? Math.abs(f).toFixed(2) : '';
-    const tc = f!==null ? (f<-1e-6?'C':'T') : '';
-    const tcClass = tc==='C'?'badge-c':(tc==='T'?'badge-t':'');
+  // Member list
+  document.getElementById('mlist').innerHTML=members.map((m,i)=>{
+    const isCrit=i===LCi, f=LF.length>i?LF[i]:null;
+    const fStr=f!==null?Math.abs(f).toFixed(2):'';
+    const tc=f!==null?(f<-1e-6?'C':'T'):'';
+    const cls=tc==='C'?'badge-c':tc==='T'?'badge-t':'';
     return `<div class="item-row m-row${isCrit?' highlight':''}">
       <span style="color:var(--muted);font-weight:700">m${m.id}</span>
       <span>J${m.j1}–J${m.j2}</span>
-      <span>${fStr?`${fStr} <span class="badge ${isCrit?'badge-crit':tcClass}">${isCrit?'CRIT':tc}</span>`:''}</span>
+      <span>${fStr?`${fStr} <span class="badge ${isCrit?'badge-crit':cls}">${isCrit?'!':tc}</span>`:''}</span>
       <button class="del-btn" onclick="removeMember(${m.id})">×</button>
     </div>`;
   }).join('');
 
-  // dropdowns
-  const opts = joints.map(j=>`<option value="${j.id}">J${j.id} (${j.x},${j.y})</option>`).join('');
-  ['new-m1','new-m2','pin-select','roller-select','load-joint-select'].forEach(id=>{
-    const el = document.getElementById(id);
-    const prev = el.value;
-    el.innerHTML = opts;
-    if(prev) el.value = prev;
+  // Dropdowns
+  const opts=joints.map(j=>`<option value="${j.id}">J${j.id} (${j.x}, ${j.y})</option>`).join('');
+  ['nm1','nm2','pin-sel','roll-sel','load-sel'].forEach(id=>{
+    const el=document.getElementById(id); const pv=el.value;
+    el.innerHTML=opts; if(pv) el.value=pv;
   });
-
-  // spec checks
-  updateSpecChecks();
-
-  draw();
+  specChecks(); draw();
 }
 
-function updateSpecChecks(){
-  const J = joints.length, M = members.length;
-  const pinJ = joints.find(j=>j.id===parseInt(document.getElementById('pin-select')?.value||0));
-  const rollJ = joints.find(j=>j.id===parseInt(document.getElementById('roller-select')?.value||0));
-  const loadJ = joints.find(j=>j.id===parseInt(document.getElementById('load-joint-select')?.value||0));
-  const W = parseFloat(document.getElementById('load-value')?.value||0);
-  const totalLen = members.reduce((s,m)=>{
-    const j1=joints.find(j=>j.id===m.j1), j2=joints.find(j=>j.id===m.j2);
-    if(!j1||!j2) return s;
-    return s+Math.sqrt((j2.x-j1.x)**2+(j2.y-j1.y)**2);
+function specChecks(){
+  const J=joints.length,M=members.length;
+  const pid=parseInt(document.getElementById('pin-sel')?.value||0);
+  const rid=parseInt(document.getElementById('roll-sel')?.value||0);
+  const lid=parseInt(document.getElementById('load-sel')?.value||0);
+  const W=parseFloat(document.getElementById('load-val')?.value||0);
+  const pj=joints.find(j=>j.id===pid),rj=joints.find(j=>j.id===rid),lj=joints.find(j=>j.id===lid);
+  const span=pj&&rj?Math.sqrt((rj.x-pj.x)**2+(rj.y-pj.y)**2):null;
+  const dy=pj&&lj?(lj.y-pj.y):null;
+  const tl=members.reduce((s,m)=>{
+    const j1=joints.find(j=>j.id===m.j1),j2=joints.find(j=>j.id===m.j2);
+    return j1&&j2?s+Math.sqrt((j2.x-j1.x)**2+(j2.y-j1.y)**2):s;
   },0);
-
-  const checks = [
-    {label:'M = 2J − 3', ok: M===2*J-3 && J>=3, val:`M=${M} J=${J}`},
-    {label:'Span = 30 in', ok: pinJ&&rollJ&&Math.abs(Math.sqrt((rollJ.x-pinJ.x)**2+(rollJ.y-pinJ.y)**2)-30)<0.5, val: pinJ&&rollJ?`${Math.sqrt((rollJ.x-pinJ.x)**2+(rollJ.y-pinJ.y)**2).toFixed(1)}" `:'-'},
-    {label:'Δy load = 2 in', ok: pinJ&&loadJ&&Math.abs(loadJ.y-pinJ.y-2)<0.1, val:pinJ&&loadJ?`Δy=${(loadJ.y-pinJ.y).toFixed(1)}"`:'-'},
-    {label:'Total length ≤ 120 in', ok: totalLen<=120, val:`${totalLen.toFixed(1)}" of 120"`},
-    {label:'Min load ≥ 32 oz', ok: W>=32, val:`${W} oz`},
+  const chk=[
+    {l:'M = 2J − 3',ok:M===2*J-3&&J>=3,v:`M=${M} J=${J}`},
+    {l:'Span = 30"',ok:span!==null&&Math.abs(span-30)<.5,v:span?`${span.toFixed(1)}"`:'-'},
+    {l:'Δy load = 2"',ok:dy!==null&&Math.abs(dy-2)<.1,v:dy!==null?`Δy=${dy.toFixed(1)}"`:'-'},
+    {l:'Length ≤ 120"',ok:tl<=120,v:`${tl.toFixed(1)}"`},
+    {l:'Min load ≥ 32 oz',ok:W>=32,v:`${W} oz`},
   ];
-
-  document.getElementById('spec-checks').innerHTML = checks.map(c=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border2)">
-      <span style="color:${c.ok?'var(--green)':'var(--red)'}">
-        ${c.ok?'✓':'✗'} ${c.label}
-      </span>
-      <span style="color:var(--muted)">${c.val}</span>
+  document.getElementById('spec-checks').innerHTML=chk.map(c=>`
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border2)">
+      <span style="color:${c.ok?'var(--green)':'var(--red)'}">${c.ok?'✓':'✗'} ${c.l}</span>
+      <span style="color:var(--muted)">${c.v}</span>
     </div>`).join('');
 }
 
-// ══════════════════════════════════════════════════════════════════
-// TRUSS SOLVER (Method of Joints — EK301 PDF Algorithm)
-// ══════════════════════════════════════════════════════════════════
-function runAnalysis(){
-  const J = joints.length, M = members.length;
-  if(M !== 2*J-3 || J<3){
-    alert(`Truss must satisfy M = 2J − 3.\nCurrently: M=${M}, 2J−3=${2*J-3}`);
-    return;
-  }
-
-  // Map joint id → 0-based index
-  const idMap = {};
-  joints.forEach((j,i)=>idMap[j.id]=i);
-
-  const pinId  = parseInt(document.getElementById('pin-select').value);
-  const rollId = parseInt(document.getElementById('roller-select').value);
-  const loadId = parseInt(document.getElementById('load-joint-select').value);
-  const W      = parseFloat(document.getElementById('load-value').value);
-
-  const P = idMap[pinId], R = idMap[rollId], LL = idMap[loadId];
-  if(P===undefined||R===undefined||LL===undefined){
-    alert('Please select valid pin, roller, and load joints.'); return;
-  }
-
-  // Build A matrix (2J × M+3) — all zeros
-  const rows = 2*J, cols = M+3;
-  let A = Array.from({length:rows}, ()=>new Array(cols).fill(0));
-  let L = new Array(rows).fill(0);
-  let lens = [];
-
-  // Member columns (unit vector components per joint)
-  members.forEach((m,i)=>{
-    const j1 = joints[idMap[m.j1]], j2 = joints[idMap[m.j2]];
-    const u1 = idMap[m.j1], u2 = idMap[m.j2];
-    const dx = j2.x - j1.x, dy = j2.y - j1.y;
-    const len = Math.sqrt(dx*dx + dy*dy);
-    lens.push(len);
-    // X equilibrium at j1 and j2
-    A[u1][i]   =  dx/len;
-    A[u2][i]   = -dx/len;
-    // Y equilibrium
-    A[u1+J][i] =  dy/len;
-    A[u2+J][i] = -dy/len;
+// ─────────── MATRIX TAB — ROW MANAGEMENT ───────────
+function mAddRow(j1='',j2=''){
+  const id=++matRid;
+  const n=document.getElementById('mgbody').children.length+1;
+  const tr=document.createElement('tr'); tr.id='mr-'+id;
+  tr.innerHTML=`
+    <td class="rn" id="mrn-${id}">${n}</td>
+    <td><input type="number" min="1" placeholder="j1" value="${j1}" oninput="mlv()"></td>
+    <td><input type="number" min="1" placeholder="j2" value="${j2}" oninput="mlv()"></td>
+    <td class="dc"><button class="del-btn" onclick="mDelRow(${id})">×</button></td>`;
+  document.getElementById('mgbody').appendChild(tr);
+  mRenum(); mlv();
+}
+function mDelRow(id){
+  const el=document.getElementById('mr-'+id); if(el) el.remove();
+  mRenum(); mlv();
+}
+function mClear(){document.getElementById('mgbody').innerHTML=''; mlv();}
+function mRenum(){
+  const rows=document.getElementById('mgbody').children;
+  Array.from(rows).forEach((tr,i)=>{
+    const c=tr.querySelector('[id^=mrn]'); if(c) c.textContent=i+1;
   });
+  document.getElementById('mmc').textContent=`${rows.length} rows`;
+}
+function mRows(){
+  const rows=document.getElementById('mgbody').children;
+  return Array.from(rows).map(tr=>{
+    const ins=tr.querySelectorAll('input');
+    const j1=parseInt(ins[0].value),j2=parseInt(ins[1].value);
+    return{j1,j2,ok:!isNaN(j1)&&!isNaN(j2)&&j1!==j2&&j1>0&&j2>0};
+  });
+}
 
-  // Reaction columns: [M] = Rpx, [M+1] = Rpy, [M+2] = Rry
-  A[P][M]     = 1;   // x-eq of pin joint → Rpx
-  A[P+J][M+1] = 1;   // y-eq of pin joint → Rpy
-  A[R+J][M+2] = 1;   // y-eq of roller    → Rry
-
-  // Load vector (downward W at load joint y-row)
-  L[LL+J] = -W;
-
-  // Solve: A·T = -L  →  T = A^{-1}·(-L)  using math.js lusolve
-  let T_arr;
-  try{
-    const negL = L.map(v=>-v);
-    const sol  = math.lusolve(A, negL);
-    T_arr = sol.map(r=>Array.isArray(r)?r[0]:r);
-  } catch(e){
-    alert('Matrix is singular — check truss geometry and support placement.\n'+e.message);
-    return;
+// ─────────── MATRIX TAB — PARSE & VALIDATE ───────────
+function pVec(s){
+  if(!s||!s.trim()) return null;
+  const n=s.replace(/[\[\]]/g,'').split(/[\s,;]+/).filter(x=>x!=='').map(Number);
+  return n.some(isNaN)?null:n;
+}
+function mlv(){
+  const X=pVec(document.getElementById('mX').value);
+  const Y=pVec(document.getElementById('mY').value);
+  const vs=document.getElementById('vec-st');
+  if(!X||!Y){
+    vs.className='status-pill s-err'; vs.textContent='⚠ Cannot parse X or Y. Use comma/space-separated numbers.';
+  } else if(X.length!==Y.length){
+    vs.className='status-pill s-err'; vs.textContent=`⚠ X has ${X.length} values, Y has ${Y.length} — must match.`;
+  } else {
+    vs.className='status-pill s-ok'; vs.textContent=`✓ ${X.length} joints parsed.`;
   }
+  const J=X&&Y&&X.length===Y.length?X.length:0;
+  const rows=mRows(), M=rows.length, need=Math.max(0,2*J-3);
+  const bad=rows.filter(r=>!r.ok||r.j1>J||r.j2>J);
+  const ms=document.getElementById('mat-st');
+  if(!J){ms.className='status-pill s-info';ms.textContent='Fix X/Y vectors first.';return;}
+  if(bad.length){ms.className='status-pill s-err';ms.textContent=`⚠ ${bad.length} row(s) have invalid/out-of-range joint indices.`;return;}
+  if(M!==need){ms.className='status-pill s-err';ms.textContent=`⚠ M=${M} but 2J−3=${need} (J=${J}). ${need>M?`Add ${need-M}`:` Remove ${M-need}`} member(s).`;return;}
+  const pin=parseInt(document.getElementById('m-pin').value||0);
+  const roll=parseInt(document.getElementById('m-roll').value||0);
+  const lj=parseInt(document.getElementById('m-lj').value||0);
+  if([pin,roll,lj].some(v=>v<1||v>J)){ms.className='status-pill s-err';ms.textContent=`⚠ Pin/Roller/Load joint # must be 1–${J}.`;return;}
+  ms.className='status-pill s-ok';ms.textContent=`✓ Valid! J=${J}, M=${M}=2J−3. Ready to import.`;
+}
 
-  const forces   = T_arr.slice(0, M);
-  const reactions = T_arr.slice(M, M+3);
+function matPreview(){
+  mlv();
+  const ms=document.getElementById('mat-st');
+  if(ms.classList.contains('s-ok')) alert('Truss looks valid!\n\n'+ms.textContent+'\n\nClick "Import & Solve" to load onto canvas.');
+  else alert('Fix errors first:\n'+ms.textContent);
+}
 
-  // Buckling & critical member (Spring 2026: F = 37.5*(10/L)^2, Ufit = 10 oz)
-  const C_fit = 37.5, Lo = 10, alpha = 2, Ufit = 10;
-  let maxW = Infinity, critIdx = -1;
+function matImport(){
+  const X=pVec(document.getElementById('mX').value);
+  const Y=pVec(document.getElementById('mY').value);
+  if(!X||!Y||X.length!==Y.length){alert('Fix X/Y vectors.');return;}
+  const J=X.length, rows=mRows(), M=rows.length;
+  if(M!==2*J-3){alert(`M=${M} but 2J−3=${2*J-3}.`);return;}
+  if(rows.some(r=>!r.ok||r.j1>J||r.j2>J)){alert('Fix invalid member rows.');return;}
+  const pin=parseInt(document.getElementById('m-pin').value);
+  const roll=parseInt(document.getElementById('m-roll').value);
+  const lj=parseInt(document.getElementById('m-lj').value);
+  const W=parseFloat(document.getElementById('m-W').value||32);
+  if([pin,roll,lj].some(v=>v<1||v>J)){alert('Fix pin/roller/load joint numbers.');return;}
+
+  joints=[];members=[];nJid=1;nMid=1;LF=[];LCi=-1;LLen=[];
+  X.forEach((x,i)=>joints.push({id:nJid++,x:+x,y:+Y[i]}));
+  rows.forEach(r=>members.push({id:nMid++,j1:r.j1,j2:r.j2}));
+  ui();
+  setTimeout(()=>{
+    document.getElementById('pin-sel').value=pin;
+    document.getElementById('roll-sel').value=roll;
+    document.getElementById('load-sel').value=lj;
+    document.getElementById('load-val').value=W;
+    specChecks(); solve(); stab('results');
+  },60);
+}
+
+// ─────────── SYNC CANVAS → MATRIX ───────────
+function syncToMatrix(){
+  if(!joints.length){alert('No joints on canvas to sync.');return;}
+  document.getElementById('mX').value=joints.map(j=>j.x).join(', ');
+  document.getElementById('mY').value=joints.map(j=>j.y).join(', ');
+  document.getElementById('mgbody').innerHTML=''; matRid=0;
+  members.forEach(m=>mAddRow(m.j1,m.j2));
+  const pin=document.getElementById('pin-sel').value;
+  const roll=document.getElementById('roll-sel').value;
+  const lj=document.getElementById('load-sel').value;
+  const W=document.getElementById('load-val').value;
+  if(pin)  document.getElementById('m-pin').value=pin;
+  if(roll) document.getElementById('m-roll').value=roll;
+  if(lj)   document.getElementById('m-lj').value=lj;
+  if(W)    document.getElementById('m-W').value=W;
+  mlv(); stab('matrix');
+}
+
+// ─────────── TEMPLATES ───────────
+function matTpl(name){
+  const T={
+    tri:{X:'0, 15, 30',Y:'0, 2, 0',mem:[[1,2],[2,3],[1,3]],pin:1,roll:3,lj:2,W:32},
+    p5: {X:'0, 10, 15, 20, 30',Y:'0, 0, 2, 0, 0',
+         mem:[[1,2],[2,3],[3,4],[4,5],[1,3],[2,3],[3,5]],pin:1,roll:5,lj:3,W:32},
+    full:{X:'0, 10, 20, 30, 5, 15, 25',Y:'0, 0, 0, 0, 2, 2, 2',
+          mem:[[1,2],[2,3],[3,4],[5,6],[6,7],[1,5],[5,2],[2,6],[6,3],[3,7],[7,4]],
+          pin:1,roll:4,lj:6,W:32},
+    warren:{
+      X:'0, 5, 10, 15, 20, 25, 30, 7.5, 22.5',Y:'0, 2, 0, 2, 0, 2, 0, 2, 2',
+      mem:[[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[1,8],[8,3],[3,9],[9,7],[2,8],[8,4],[4,9],[9,6],[2,4]],
+      pin:1,roll:7,lj:4,W:32}
+  };
+  const t=T[name]; if(!t) return;
+  document.getElementById('mX').value=t.X;
+  document.getElementById('mY').value=t.Y;
+  document.getElementById('mgbody').innerHTML=''; matRid=0;
+  t.mem.forEach(([a,b])=>mAddRow(a,b));
+  document.getElementById('m-pin').value=t.pin;
+  document.getElementById('m-roll').value=t.roll;
+  document.getElementById('m-lj').value=t.lj;
+  document.getElementById('m-W').value=t.W;
+  mlv();
+}
+
+// ─────────── SOLVER ───────────
+function solve(){
+  const J=joints.length,M=members.length;
+  if(M!==2*J-3||J<3){alert(`M=${M} but 2J−3=${2*J-3}. Must satisfy M=2J−3.`);return;}
+  const idMap={}; joints.forEach((j,i)=>idMap[j.id]=i);
+  const pinId =parseInt(document.getElementById('pin-sel').value);
+  const rollId=parseInt(document.getElementById('roll-sel').value);
+  const loadId=parseInt(document.getElementById('load-sel').value);
+  const W     =parseFloat(document.getElementById('load-val').value);
+  const P=idMap[pinId],R=idMap[rollId],LL=idMap[loadId];
+  if(P===undefined||R===undefined||LL===undefined){
+    alert('Set pin, roller, and load joints in the Loads tab.');return;
+  }
+  // Build A and L
+  const A=Array.from({length:2*J},()=>new Array(M+3).fill(0));
+  const L=new Array(2*J).fill(0);
+  const lens=[];
+  members.forEach((m,i)=>{
+    const j1=joints[idMap[m.j1]],j2=joints[idMap[m.j2]];
+    const u1=idMap[m.j1],u2=idMap[m.j2];
+    const dx=j2.x-j1.x,dy=j2.y-j1.y,len=Math.sqrt(dx*dx+dy*dy);
+    lens.push(len);
+    A[u1][i]=dx/len; A[u2][i]=-dx/len;
+    A[u1+J][i]=dy/len; A[u2+J][i]=-dy/len;
+  });
+  A[P][M]=1; A[P+J][M+1]=1; A[R+J][M+2]=1;
+  L[LL+J]=-W;
+  let T;
+  try{T=math.lusolve(A,L.map(v=>-v)).map(r=>Array.isArray(r)?r[0]:r);}
+  catch(e){alert('Singular matrix — check geometry.\n'+e.message);return;}
+  const forces=T.slice(0,M), reactions=T.slice(M,M+3);
+  const Cf=37.5,Lo=10,al=2,Uf=10;
+  let maxW=Infinity,ci=-1;
   forces.forEach((f,i)=>{
-    if(f < -1e-6){
-      const Pc = C_fit * Math.pow(Lo/lens[i], alpha);
-      const Wfail = Pc / Math.abs(f/W);      // = Pc*W/|Ti|
-      if(Wfail < maxW){ maxW = Wfail; critIdx = i; }
+    if(f<-1e-6){
+      const Pc=Cf*Math.pow(Lo/lens[i],al);
+      const wf=Pc/Math.abs(f/W);
+      if(wf<maxW){maxW=wf;ci=i;}
     }
   });
-
-  lastForces = forces; lastCritIdx = critIdx; lastLens = lens;
-
-  // Cost: C = 1*Ltotal + 10*J
-  const Ltotal = lens.reduce((a,b)=>a+b, 0);
-  const cost   = 1*Ltotal + 10*J;
-  const ratio  = maxW/cost;
-
-  // ── Display results ──
-  document.getElementById('r-maxload').textContent = maxW===Infinity ? '—' : maxW.toFixed(2)+' oz';
-  document.getElementById('r-maxload').className = 'metric-val'+(maxW>=32?' good':' warn');
-  document.getElementById('r-crit').textContent = critIdx>=0 ? `m${members[critIdx].id}` : '—';
-  document.getElementById('r-cost').textContent = cost.toFixed(1)+' units';
-  document.getElementById('r-ratio').textContent = maxW===Infinity ? '—' : ratio.toFixed(4)+' oz/u';
-  document.getElementById('r-length').textContent = Ltotal.toFixed(2)+'"';
-  document.getElementById('r-length').className = 'metric-val'+(Ltotal<=120?'':' warn');
-  document.getElementById('r-uncert').textContent = maxW===Infinity ? '—' : `±${(Ufit*W/Math.abs(forces[critIdx]||1)).toFixed(1)} oz`;
-
-  // Member table
-  document.getElementById('results-tbody').innerHTML = forces.map((f,i)=>{
-    const isC   = f < -1e-6;
-    const isCrit = i===critIdx;
-    const Pc    = isC ? C_fit*Math.pow(Lo/lens[i],alpha) : null;
-    const type  = isC ? (isCrit?'<span class="badge badge-crit">CRIT</span>':'<span class="badge badge-c">C</span>') : '<span class="badge badge-t">T</span>';
+  LF=forces; LCi=ci; LLen=lens;
+  const Ltot=lens.reduce((a,b)=>a+b,0), cost=Ltot+10*J, ratio=maxW/cost;
+  document.getElementById('r-ml').textContent=maxW===Infinity?'—':maxW.toFixed(2)+' oz';
+  document.getElementById('r-ml').className='mv'+(maxW>=32?' good':' warn');
+  document.getElementById('r-cm').textContent=ci>=0?`m${members[ci].id}`:'—';
+  document.getElementById('r-co').textContent=cost.toFixed(1)+' units';
+  document.getElementById('r-lc').textContent=maxW===Infinity?'—':ratio.toFixed(4)+' oz/u';
+  document.getElementById('r-le').textContent=Ltot.toFixed(2)+'"';
+  document.getElementById('r-le').className='mv'+(Ltot<=120?'':' warn');
+  document.getElementById('r-un').textContent=ci>=0?'±'+(Uf*W/Math.abs(forces[ci])).toFixed(1)+' oz':'—';
+  document.getElementById('rtbody').innerHTML=forces.map((f,i)=>{
+    const isC=f<-1e-6,isCrit=i===ci,Pc=isC?Cf*Math.pow(Lo/lens[i],al):null;
+    const badge=isCrit?'<span class="badge badge-crit">CRIT</span>':
+                 isC?'<span class="badge badge-c">C</span>':'<span class="badge badge-t">T</span>';
     return `<tr class="${isCrit?'is-crit':''}">
-      <td><b>m${members[i].id}</b></td>
-      <td>${lens[i].toFixed(2)}"</td>
-      <td>${Math.abs(f).toFixed(3)}</td>
-      <td>${type}</td>
-      <td>${Pc!==null?Pc.toFixed(2):'—'}</td>
-    </tr>`;
+      <td><b>m${members[i].id}</b></td><td>${lens[i].toFixed(2)}</td>
+      <td>${Math.abs(f).toFixed(4)}</td><td>${badge}</td>
+      <td>${Pc!==null?Pc.toFixed(2):'—'}</td></tr>`;
   }).join('');
-
-  // Reactions table
-  const rLabels = [`Rpx (J${pinId})`,`Rpy (J${pinId})`,`Rry (J${rollId})`];
-  document.getElementById('reactions-tbody').innerHTML = reactions.map((r,i)=>
-    `<tr><td>${rLabels[i]}</td><td>${r.toFixed(4)}</td></tr>`
-  ).join('');
-
-  updateUI();
-  switchTab('results');
+  const rl=[`Rpx (J${pinId})`,`Rpy (J${pinId})`,`Rry (J${rollId})`];
+  document.getElementById('rxbody').innerHTML=reactions.map((r,i)=>
+    `<tr><td>${rl[i]}</td><td>${r.toFixed(4)}</td></tr>`).join('');
+  ui();
+}
+function resetRes(){
+  ['r-ml','r-cm','r-co','r-lc','r-le','r-un'].forEach(id=>{document.getElementById(id).textContent='—';});
+  document.getElementById('rtbody').innerHTML='';
+  document.getElementById('rxbody').innerHTML='';
 }
 
-function resetResults(){
-  ['r-maxload','r-crit','r-cost','r-ratio','r-length','r-uncert'].forEach(id=>{
-    document.getElementById(id).textContent='—';
-  });
-  document.getElementById('results-tbody').innerHTML='';
-  document.getElementById('reactions-tbody').innerHTML='';
+// ─────────── CANVAS ───────────
+const canvas=document.getElementById('tc'), ctx=canvas.getContext('2d');
+function gTx(){
+  const w=canvas.width,h=canvas.height;
+  if(!joints.length) return{ox:80,oy:h-60,sc:18};
+  const xs=joints.map(j=>j.x),ys=joints.map(j=>j.y);
+  const mnX=Math.min(...xs),mxX=Math.max(...xs),mnY=Math.min(...ys),mxY=Math.max(...ys);
+  const pad=85;
+  const sx=(w-2*pad)/Math.max(mxX-mnX,1),sy=(h-2*pad)/Math.max(mxY-mnY,1);
+  const sc=Math.min(sx,sy,32);
+  const ox=pad+(w-2*pad-(mxX-mnX)*sc)/2-mnX*sc;
+  const oy=h-pad-(h-2*pad-(mxY-mnY)*sc)/2+mnY*sc;
+  return{ox,oy,sc};
 }
-
-// ══════════════════════════════════════════════════════════════════
-// CANVAS DRAWING
-// ══════════════════════════════════════════════════════════════════
-const canvas = document.getElementById('trussCanvas');
-const ctx    = canvas.getContext('2d');
-
-function getTransform(){
-  const w = canvas.width, h = canvas.height;
-  if(!joints.length) return {ox:80, oy:h-60, scale:18};
-  const xs = joints.map(j=>j.x), ys = joints.map(j=>j.y);
-  const minX=Math.min(...xs), maxX=Math.max(...xs);
-  const minY=Math.min(...ys), maxY=Math.max(...ys);
-  const pad = 80;
-  const sx = (w-2*pad)/Math.max(maxX-minX,1);
-  const sy = (h-2*pad)/Math.max(maxY-minY,1);
-  const scale = Math.min(sx,sy,30);
-  const ox = pad + (w-2*pad - (maxX-minX)*scale)/2 - minX*scale;
-  const oy = h-pad - (h-2*pad - (maxY-minY)*scale)/2 + minY*scale;
-  return {ox, oy, scale};
-}
-
-function toCanvas(x,y){
-  const {ox,oy,scale}=getTransform();
-  return {cx: ox+x*scale, cy: oy-y*scale};
-}
+function toC(x,y){const{ox,oy,sc}=gTx();return{cx:ox+x*sc,cy:oy-y*sc};}
 
 function draw(){
-  const w = canvas.width = canvas.parentElement.clientWidth;
-  const h = canvas.height = canvas.parentElement.clientHeight;
+  const w=canvas.width=document.getElementById('cw').clientWidth;
+  const h=canvas.height=document.getElementById('cw').clientHeight;
   ctx.clearRect(0,0,w,h);
   if(!joints.length) return;
+  const {sc}=gTx();
+  const pid=parseInt(document.getElementById('pin-sel')?.value||0);
+  const rid=parseInt(document.getElementById('roll-sel')?.value||0);
+  const lid=parseInt(document.getElementById('load-sel')?.value||0);
 
-  const {scale} = getTransform();
-  const pinId  = parseInt(document.getElementById('pin-select')?.value||0);
-  const rollId = parseInt(document.getElementById('roller-select')?.value||0);
-  const loadId = parseInt(document.getElementById('load-joint-select')?.value||0);
-
-  // Draw members
+  // Members
   members.forEach((m,i)=>{
-    const j1=joints.find(j=>j.id===m.j1), j2=joints.find(j=>j.id===m.j2);
+    const j1=joints.find(j=>j.id===m.j1),j2=joints.find(j=>j.id===m.j2);
     if(!j1||!j2) return;
-    const p1=toCanvas(j1.x,j1.y), p2=toCanvas(j2.x,j2.y);
-    const isCrit = i===lastCritIdx;
-    const hasF = lastForces.length>i;
-    const f = hasF ? lastForces[i] : null;
-
-    ctx.beginPath();
-    ctx.moveTo(p1.cx,p1.cy);
-    ctx.lineTo(p2.cx,p2.cy);
-
-    if(isCrit){
-      ctx.strokeStyle='#ff4d6a'; ctx.lineWidth=4;
-      // glow
-      ctx.shadowColor='#ff4d6a'; ctx.shadowBlur=12;
-    } else if(f===null){
-      ctx.strokeStyle='#2d4a6e'; ctx.lineWidth=2;
-      ctx.shadowBlur=0;
-    } else if(f>1e-6){
-      const intensity = Math.min(Math.abs(f)/50,1);
-      ctx.strokeStyle=`rgba(59,158,255,${0.4+intensity*0.6})`; ctx.lineWidth=2.5;
-      ctx.shadowBlur=0;
-    } else if(f<-1e-6){
-      const intensity = Math.min(Math.abs(f)/50,1);
-      ctx.strokeStyle=`rgba(245,158,11,${0.4+intensity*0.6})`; ctx.lineWidth=2.5;
-      ctx.shadowBlur=0;
-    } else {
-      ctx.strokeStyle='#475569'; ctx.lineWidth=1.5; ctx.shadowBlur=0;
-    }
-    ctx.stroke();
-    ctx.shadowBlur=0;
-
-    // Member label at midpoint
-    const mx=(p1.cx+p2.cx)/2, my=(p1.cy+p2.cy)/2;
-    ctx.fillStyle = isCrit ? '#ff4d6a' : (f===null?'#3b6a9e':'#94a3b8');
-    ctx.font = `600 ${Math.max(9,Math.min(11,scale*0.5))}px 'JetBrains Mono'`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(`m${m.id}`, mx, my-8);
+    const p1=toC(j1.x,j1.y),p2=toC(j2.x,j2.y);
+    const isCrit=i===LCi,f=LF.length>i?LF[i]:null;
+    ctx.beginPath();ctx.moveTo(p1.cx,p1.cy);ctx.lineTo(p2.cx,p2.cy);
+    if(isCrit){ctx.strokeStyle='#ff4d6a';ctx.lineWidth=4;ctx.shadowColor='#ff4d6a';ctx.shadowBlur=14;}
+    else if(f===null){ctx.strokeStyle='#2d4a6e';ctx.lineWidth=2;ctx.shadowBlur=0;}
+    else if(f>1e-6){const it=Math.min(Math.abs(f)/50,1);ctx.strokeStyle=`rgba(59,158,255,${.4+it*.6})`;ctx.lineWidth=2.5;ctx.shadowBlur=0;}
+    else if(f<-1e-6){const it=Math.min(Math.abs(f)/50,1);ctx.strokeStyle=`rgba(245,158,11,${.4+it*.6})`;ctx.lineWidth=2.5;ctx.shadowBlur=0;}
+    else{ctx.strokeStyle='#475569';ctx.lineWidth=1.5;ctx.shadowBlur=0;}
+    ctx.stroke();ctx.shadowBlur=0;
+    const mx=(p1.cx+p2.cx)/2,my=(p1.cy+p2.cy)/2;
+    ctx.fillStyle=isCrit?'#ff4d6a':f===null?'#3b6a9e':'#94a3b8';
+    ctx.font=`600 ${Math.max(9,Math.min(11,sc*.5))}px 'JetBrains Mono'`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(`m${m.id}`,mx,my-8);
     if(f!==null){
-      const tc = f < -1e-6 ? 'C' : 'T';
-      ctx.font = `500 ${Math.max(8,Math.min(10,scale*0.45))}px 'JetBrains Mono'`;
-      ctx.fillStyle = f<-1e-6 ? '#f59e0b' : '#3b9eff';
-      ctx.fillText(`${Math.abs(f).toFixed(1)}`, mx, my+8);
+      ctx.font=`500 ${Math.max(8,Math.min(10,sc*.45))}px 'JetBrains Mono'`;
+      ctx.fillStyle=f<-1e-6?'#f59e0b':'#3b9eff';
+      ctx.fillText(`${Math.abs(f).toFixed(1)}`,mx,my+8);
     }
   });
 
-  // First member-mode joint highlight
-  if(memberFirstJoint!==null){
-    const j=joints.find(j=>j.id===memberFirstJoint);
-    if(j){
-      const p=toCanvas(j.x,j.y);
-      ctx.beginPath();
-      ctx.arc(p.cx,p.cy,14,0,Math.PI*2);
-      ctx.strokeStyle='rgba(59,158,255,0.7)';
-      ctx.lineWidth=2; ctx.setLineDash([4,3]);
-      ctx.stroke(); ctx.setLineDash([]);
-    }
+  // Member-mode first selection ring
+  if(mFirst!==null){
+    const j=joints.find(j=>j.id===mFirst);
+    if(j){const p=toC(j.x,j.y);ctx.beginPath();ctx.arc(p.cx,p.cy,14,0,Math.PI*2);ctx.strokeStyle='rgba(59,158,255,.7)';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);}
   }
 
-  // Draw joints
+  // Joints
   joints.forEach(j=>{
-    const p=toCanvas(j.x,j.y);
-    const isPin  = j.id===pinId;
-    const isRoll = j.id===rollId;
-    const isLoad = j.id===loadId;
-    const isFirst = j.id===memberFirstJoint;
-
-    const r = Math.max(5, Math.min(8, scale*0.35));
-
-    // Support triangles
+    const p=toC(j.x,j.y),isPin=j.id===pid,isRoll=j.id===rid,isLoad=j.id===lid,isFirst=j.id===mFirst;
+    const r=Math.max(5,Math.min(8,sc*.35));
     if(isPin){
-      ctx.beginPath();
-      ctx.moveTo(p.cx,p.cy+r);
-      ctx.lineTo(p.cx-12,p.cy+r+16);
-      ctx.lineTo(p.cx+12,p.cy+r+16);
-      ctx.closePath();
-      ctx.fillStyle='rgba(255,77,106,0.2)'; ctx.fill();
-      ctx.strokeStyle='#ff4d6a'; ctx.lineWidth=1.5; ctx.stroke();
-      // hash marks
-      for(let k=-12;k<=12;k+=4){
-        ctx.beginPath(); ctx.moveTo(p.cx+k-4,p.cy+r+17); ctx.lineTo(p.cx+k,p.cy+r+21);
-        ctx.strokeStyle='#ff4d6a'; ctx.lineWidth=1; ctx.stroke();
-      }
+      ctx.beginPath();ctx.moveTo(p.cx,p.cy+r);ctx.lineTo(p.cx-12,p.cy+r+16);ctx.lineTo(p.cx+12,p.cy+r+16);ctx.closePath();
+      ctx.fillStyle='rgba(255,77,106,.2)';ctx.fill();ctx.strokeStyle='#ff4d6a';ctx.lineWidth=1.5;ctx.stroke();
+      for(let k=-12;k<=12;k+=4){ctx.beginPath();ctx.moveTo(p.cx+k-4,p.cy+r+17);ctx.lineTo(p.cx+k,p.cy+r+21);ctx.strokeStyle='#ff4d6a';ctx.lineWidth=1;ctx.stroke();}
     }
     if(isRoll){
-      ctx.beginPath();
-      ctx.moveTo(p.cx,p.cy+r);
-      ctx.lineTo(p.cx-12,p.cy+r+16);
-      ctx.lineTo(p.cx+12,p.cy+r+16);
-      ctx.closePath();
-      ctx.fillStyle='rgba(34,211,165,0.12)'; ctx.fill();
-      ctx.strokeStyle='var(--green)'; ctx.lineWidth=1.5; ctx.stroke();
-      ctx.beginPath(); ctx.arc(p.cx,p.cy+r+20,4,0,Math.PI*2);
-      ctx.strokeStyle='#22d3a5'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.beginPath();ctx.moveTo(p.cx,p.cy+r);ctx.lineTo(p.cx-12,p.cy+r+16);ctx.lineTo(p.cx+12,p.cy+r+16);ctx.closePath();
+      ctx.fillStyle='rgba(34,211,165,.12)';ctx.fill();ctx.strokeStyle='#22d3a5';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.beginPath();ctx.arc(p.cx,p.cy+r+20,4,0,Math.PI*2);ctx.strokeStyle='#22d3a5';ctx.lineWidth=1.5;ctx.stroke();
     }
-
-    // Load arrow
     if(isLoad){
-      const aLen=30;
-      ctx.beginPath();
-      ctx.moveTo(p.cx,p.cy-aLen-r);
-      ctx.lineTo(p.cx,p.cy-r);
-      ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2.5; ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(p.cx,p.cy-r);
-      ctx.lineTo(p.cx-7,p.cy-r-14);
-      ctx.lineTo(p.cx+7,p.cy-r-14);
-      ctx.closePath();
-      ctx.fillStyle='#f59e0b'; ctx.fill();
-      const W=parseFloat(document.getElementById('load-value')?.value||32);
-      ctx.fillStyle='#f59e0b';
-      ctx.font=`700 10px 'JetBrains Mono'`;
-      ctx.textAlign='center';
-      ctx.fillText(`W=${W}oz`,p.cx,p.cy-aLen-r-6);
+      const aLen=28;
+      ctx.beginPath();ctx.moveTo(p.cx,p.cy-aLen-r);ctx.lineTo(p.cx,p.cy-r);ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;ctx.stroke();
+      ctx.beginPath();ctx.moveTo(p.cx,p.cy-r);ctx.lineTo(p.cx-7,p.cy-r-13);ctx.lineTo(p.cx+7,p.cy-r-13);ctx.closePath();ctx.fillStyle='#f59e0b';ctx.fill();
+      ctx.fillStyle='#f59e0b';ctx.font=`700 10px 'JetBrains Mono'`;ctx.textAlign='center';
+      ctx.fillText(`W=${parseFloat(document.getElementById('load-val')?.value||32)}oz`,p.cx,p.cy-aLen-r-6);
     }
-
-    // Joint circle
-    ctx.beginPath();
-    ctx.arc(p.cx,p.cy,r,0,Math.PI*2);
-    let fill = '#1e3a5f', stroke = '#3b9eff';
-    if(isPin)  { fill='rgba(255,77,106,0.2)'; stroke='#ff4d6a'; }
-    if(isRoll) { fill='rgba(34,211,165,0.2)'; stroke='#22d3a5'; }
-    if(isFirst){ fill='rgba(59,158,255,0.4)'; stroke='#7fd4ff'; }
-    ctx.fillStyle=fill; ctx.fill();
-    ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke();
-
-    // Joint label
+    ctx.beginPath();ctx.arc(p.cx,p.cy,r,0,Math.PI*2);
+    let fill='#1e3a5f',stroke='#3b9eff';
+    if(isPin){fill='rgba(255,77,106,.2)';stroke='#ff4d6a';}
+    if(isRoll){fill='rgba(34,211,165,.2)';stroke='#22d3a5';}
+    if(isFirst){fill='rgba(59,158,255,.4)';stroke='#7fd4ff';}
+    ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();
     ctx.fillStyle=isPin?'#ff4d6a':isRoll?'#22d3a5':'#94a3b8';
-    ctx.font=`600 ${Math.max(9,Math.min(11,scale*0.5))}px 'JetBrains Mono'`;
-    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.font=`600 ${Math.max(9,Math.min(11,sc*.5))}px 'JetBrains Mono'`;
+    ctx.textAlign='center';ctx.textBaseline='top';
     ctx.fillText(`J${j.id}`,p.cx,p.cy+r+3);
-    ctx.font=`400 ${Math.max(7,Math.min(9,scale*0.4))}px 'JetBrains Mono'`;
+    ctx.font=`400 ${Math.max(7,Math.min(9,sc*.4))}px 'JetBrains Mono'`;
     ctx.fillStyle='#4a6580';
-    ctx.fillText(`(${j.x},${j.y})`,p.cx,p.cy+r+14);
+    ctx.fillText(`(${j.x},${j.y})`,p.cx,p.cy+r+13);
   });
 }
 
-// ══════════════════════════════════════════════════════════════════
-// CANVAS INTERACTION
-// ══════════════════════════════════════════════════════════════════
-function snapTo(v, step=0.5){ return Math.round(v/step)*step; }
-
-function getCanvasPos(e){
-  const rect = canvas.getBoundingClientRect();
-  const {ox,oy,scale}=getTransform();
-  const px = (e.clientX-rect.left) * (canvas.width/rect.width);
-  const py = (e.clientY-rect.top)  * (canvas.height/rect.height);
-  return {
-    x: snapTo((px-ox)/scale),
-    y: snapTo((oy-py)/scale)
-  };
-}
-
-function findNearbyJoint(cx,cy, thresh=15){
+// ─────────── CANVAS INTERACTION ───────────
+function snap(v,s=0.5){return Math.round(v/s)*s;}
+function getPos(e){
   const rect=canvas.getBoundingClientRect();
-  const sx=canvas.width/rect.width, sy=canvas.height/rect.height;
-  const rawX=cx*sx, rawY=cy*sy;
-  let best=null, bestD=thresh*thresh;
-  joints.forEach(j=>{
-    const p=toCanvas(j.x,j.y);
-    const d=(rawX-p.cx)**2+(rawY-p.cy)**2;
-    if(d<bestD){bestD=d;best=j;}
-  });
+  const {ox,oy,sc}=gTx();
+  return{x:snap((e.clientX-rect.left)*(canvas.width/rect.width)-ox)/sc,
+         y:snap(oy-((e.clientY-rect.top)*(canvas.height/rect.height)))/sc};
+}
+function nearJ(cx,cy,thr=15){
+  const rect=canvas.getBoundingClientRect();
+  const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+  const rx=cx*sx,ry=cy*sy;
+  let best=null,bd=thr*thr;
+  joints.forEach(j=>{const p=toC(j.x,j.y),d=(rx-p.cx)**2+(ry-p.cy)**2;if(d<bd){bd=d;best=j;}});
   return best;
 }
-
-function findNearbyMember(cx,cy, thresh=10){
+function nearM(cx,cy,thr=10){
   const rect=canvas.getBoundingClientRect();
-  const sx=canvas.width/rect.width, sy=canvas.height/rect.height;
-  const px=cx*sx, py=cy*sy;
-  let best=null, bestD=thresh;
+  const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+  const px=cx*sx,py=cy*sy;
+  let best=null,bd=thr;
   members.forEach(m=>{
-    const j1=joints.find(j=>j.id===m.j1), j2=joints.find(j=>j.id===m.j2);
+    const j1=joints.find(j=>j.id===m.j1),j2=joints.find(j=>j.id===m.j2);
     if(!j1||!j2) return;
-    const p1=toCanvas(j1.x,j1.y), p2=toCanvas(j2.x,j2.y);
-    const d=pointToSegDist(px,py,p1.cx,p1.cy,p2.cx,p2.cy);
-    if(d<bestD){bestD=d;best=m;}
+    const p1=toC(j1.x,j1.y),p2=toC(j2.x,j2.y);
+    const d=ptSeg(px,py,p1.cx,p1.cy,p2.cx,p2.cy);
+    if(d<bd){bd=d;best=m;}
   });
   return best;
 }
-
-function pointToSegDist(px,py,ax,ay,bx,by){
-  const dx=bx-ax, dy=by-ay;
-  const t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy+1e-10)));
+function ptSeg(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy+1e-10)));
   return Math.sqrt((px-(ax+t*dx))**2+(py-(ay+t*dy))**2);
 }
-
-canvas.addEventListener('click', e=>{
+canvas.addEventListener('click',e=>{
   const rect=canvas.getBoundingClientRect();
-  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
-
-  if(currentMode==='joint'){
-    const pos=getCanvasPos(e);
-    addJoint(pos.x, pos.y);
-  } else if(currentMode==='member'){
-    const j=findNearbyJoint(cx,cy);
+  const cx=e.clientX-rect.left,cy=e.clientY-rect.top;
+  if(mode==='joint'){const p=getPos(e);addJoint(p.x,p.y);}
+  else if(mode==='member'){
+    const j=nearJ(cx,cy);
     if(j){
-      if(memberFirstJoint===null){
-        memberFirstJoint=j.id;
-        draw();
-      } else {
-        addMember(memberFirstJoint, j.id);
-        memberFirstJoint=null;
-      }
+      if(mFirst===null){mFirst=j.id;draw();}
+      else{addMember(mFirst,j.id);mFirst=null;}
     }
-  } else if(currentMode==='delete'){
-    const j=findNearbyJoint(cx,cy);
-    if(j){ removeJoint(j.id); return; }
-    const m=findNearbyMember(cx,cy);
-    if(m){ removeMember(m.id); }
+  } else if(mode==='delete'){
+    const j=nearJ(cx,cy);if(j){removeJoint(j.id);return;}
+    const m=nearM(cx,cy);if(m) removeMember(m.id);
   }
 });
-
-// Hover tooltip
-canvas.addEventListener('mousemove', e=>{
+canvas.addEventListener('mousemove',e=>{
   const rect=canvas.getBoundingClientRect();
-  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
-  const tip=document.getElementById('tooltip');
-
-  const j=findNearbyJoint(cx,cy,20);
+  const cx=e.clientX-rect.left,cy=e.clientY-rect.top;
+  const tip=document.getElementById('tip');
+  const j=nearJ(cx,cy,20);
   if(j){
-    tip.style.display='block';
-    tip.style.left=e.clientX+12+'px';
-    tip.style.top=e.clientY-24+'px';
-    const isPin=j.id===parseInt(document.getElementById('pin-select')?.value||0);
-    const isRoll=j.id===parseInt(document.getElementById('roller-select')?.value||0);
-    const isLoad=j.id===parseInt(document.getElementById('load-joint-select')?.value||0);
-    tip.textContent=`J${j.id} (${j.x}", ${j.y}")${isPin?' 📌':isRoll?' ⊙':isLoad?' ↓W':''}`;
-    return;
+    tip.style.display='block';tip.style.left=e.clientX+12+'px';tip.style.top=e.clientY-24+'px';
+    const isPin=j.id===parseInt(document.getElementById('pin-sel')?.value||0);
+    const isRoll=j.id===parseInt(document.getElementById('roll-sel')?.value||0);
+    const isLoad=j.id===parseInt(document.getElementById('load-sel')?.value||0);
+    tip.textContent=`J${j.id} (${j.x}", ${j.y}")${isPin?' 📌':isRoll?' ⊙':isLoad?' ↓W':''}`;return;
   }
-  const m=findNearbyMember(cx,cy,12);
-  if(m&&lastForces.length){
-    const i=members.indexOf(m);
-    if(i>=0){
-      const f=lastForces[i];
-      const len=lastLens[i];
-      tip.style.display='block';
-      tip.style.left=e.clientX+12+'px';
-      tip.style.top=e.clientY-24+'px';
-      const tc=f<-1e-6?'Compression':'Tension';
-      tip.textContent=`m${m.id}: ${Math.abs(f).toFixed(3)} oz (${tc})  L=${len.toFixed(2)}"`;
-      return;
+  if(LF.length){
+    const m=nearM(cx,cy,12);
+    if(m){
+      const i=members.indexOf(m);
+      if(i>=0){
+        tip.style.display='block';tip.style.left=e.clientX+12+'px';tip.style.top=e.clientY-24+'px';
+        tip.textContent=`m${m.id}: ${Math.abs(LF[i]).toFixed(3)} oz ${LF[i]<-1e-6?'(C)':'(T)'}  L=${LLen[i].toFixed(2)}"`;return;
+      }
     }
   }
   tip.style.display='none';
 });
-canvas.addEventListener('mouseleave',()=>{document.getElementById('tooltip').style.display='none'});
-
-// Resize
+canvas.addEventListener('mouseleave',()=>{document.getElementById('tip').style.display='none';});
 window.addEventListener('resize',draw);
 
-// ══════════════════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════════════════
-loadExample();
+// ─────────── INIT ───────────
+function loadEx(){
+  clearAll();
+  [[0,0],[10,0],[20,0],[30,0],[5,2],[15,2],[25,2]].forEach(([x,y])=>addJoint(x,y));
+  [[1,2],[2,3],[3,4],[5,6],[6,7],[1,5],[5,2],[2,6],[6,3],[3,7],[7,4]].forEach(([a,b])=>addMember(a,b));
+  setTimeout(()=>{
+    document.getElementById('pin-sel').value=1;
+    document.getElementById('roll-sel').value=4;
+    document.getElementById('load-sel').value=6;
+    document.getElementById('load-val').value=32;
+    specChecks();
+  },30);
+}
+loadEx();
 </script>
 </body>
 </html>
