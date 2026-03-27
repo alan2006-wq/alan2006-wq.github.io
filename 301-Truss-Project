@@ -1,120 +1,378 @@
-<div class="panel" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EK301 Interactive Truss Designer</title>
     
-    <div style="display: flex; flex-direction: column;">
-        <div class="sidebar-title" style="display: flex; justify-content: space-between;">
-            <span>Structural Definition (JSON)</span>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="btn-secondary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="formatJSON()">Auto-Format</button>
-                <button class="btn-secondary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="clearInput()">Clear</button>
-            </div>
-        </div>
-        
-        <div style="position: relative; flex: 1;">
-            <div id="line-numbers" style="position: absolute; left: 0; top: 0; width: 30px; height: 100%; background: rgba(0,0,0,0.3); color: #475569; font-family: monospace; font-size: 0.85rem; padding: 1rem 5px; text-align: right; border-radius: 8px 0 0 8px; pointer-events: none; overflow: hidden;">
-                1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10...
-            </div>
-            <textarea id="json-input" 
-                style="width: 100%; height: 450px; padding-left: 40px; background: #020617; border: 1px solid var(--accent-blue); color: #60a5fa;" 
-                spellcheck="false" 
-                oninput="updateInspector()"></textarea>
-        </div>
-        
-        <div class="btn-group" style="margin-top: 1rem;">
-            <button class="btn-primary" onclick="runAnalysis()" style="height: 50px; font-size: 1.1rem;">⚡ EXECUTE ANALYSIS</button>
-        </div>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <div style="display: flex; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; border: 1px dashed var(--border-color);">
-        <div class="sidebar-title">Live Data Inspector</div>
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.8);
+            --bg-input: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --accent-green: #10b981;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 400px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .sidebar-section { padding: 1.25rem; border-bottom: 1px solid var(--border-color); }
+        .sidebar-title { font-size: 0.9rem; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 1rem; display: flex; justify-content: space-between; }
+
+        /* Main Workspace */
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: #020617; }
         
-        <div id="inspector-content" style="overflow-y: auto; max-height: 480px;">
-            <div style="color: var(--text-muted); text-align: center; margin-top: 4rem;">
-                <p>Waiting for valid JSON input...</p>
-                <p style="font-size: 0.8rem;">Paste your EK301 .mat proxy data to see the breakdown.</p>
+        #canvas-wrapper {
+            flex: 1;
+            position: relative;
+            cursor: crosshair;
+            background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* UI Elements */
+        .input-group { margin-bottom: 0.75rem; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        input, select {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border-color);
+            color: white; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;
+            border: none; transition: 0.2s;
+        }
+        .btn-add { background: var(--accent-blue); color: white; width: 100%; }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.25rem 0.5rem; }
+        
+        /* Floating HUD */
+        .hud {
+            position: absolute; bottom: 2rem; right: 2rem;
+            background: rgba(15, 23, 42, 0.9); padding: 1.5rem; border-radius: 12px;
+            border: 1px solid var(--border-color); min-width: 250px; pointer-events: none;
+        }
+
+        .item-list { max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
+        .list-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr 40px; gap: 0.5rem;
+            align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .status-badge {
+            position: absolute; top: 1rem; right: 1rem; padding: 0.5rem 1rem;
+            border-radius: 20px; font-weight: bold; font-size: 0.75rem;
+        }
+        .status-valid { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-invalid { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2 style="font-size: 1.2rem;">Truss Workshop</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Spring 2026 Preliminary Design</p>
+        </div>
+
+        <section class="sidebar-section">
+            <div class="sidebar-title">Joints <span>(Click canvas to add)</span></div>
+            <div class="item-list" id="joint-list"></div>
+            <div style="margin-top:1rem; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem;">
+                <input type="number" id="new-jx" placeholder="X (in)">
+                <input type="number" id="new-jy" placeholder="Y (in)">
+                <button class="btn btn-add" onclick="addJointManual()">Add</button>
+            </div>
+        </section>
+
+        <section class="sidebar-section">
+            <div class="sidebar-title">Members</div>
+            <div class="item-list" id="member-list"></div>
+            <div style="margin-top:1rem; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem;">
+                <select id="new-m1"></select>
+                <select id="new-m2"></select>
+                <button class="btn btn-add" onclick="addMember()">Link</button>
+            </div>
+        </section>
+
+        <section class="sidebar-section">
+            <div class="sidebar-title">Loads & Supports</div>
+            <div class="input-group">
+                <label>External Load (oz) at Selected Joint</label>
+                <div style="display:flex; gap:0.5rem;">
+                    <select id="load-joint-select"></select>
+                    <input type="number" id="load-value" value="32">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Pin Support Joint</label>
+                <select id="pin-select"></select>
+            </div>
+            <div class="input-group">
+                <label>Roller Support Joint</label>
+                <select id="roller-select"></select>
+            </div>
+            <button class="btn btn-add" style="background: var(--accent-orange);" onclick="runAnalysis()">Solve Truss</button>
+        </section>
+    </aside>
+
+    <main class="main-content">
+        <div id="status-badge" class="status-badge status-invalid">M = 2J - 3 Requirement</div>
+        <div id="canvas-wrapper">
+            <canvas id="trussCanvas"></canvas>
+        </div>
+
+        <div class="hud">
+            <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Results</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;" id="hud-max-load">-- oz</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label>Critical Member</label>
+                    <div id="hud-crit-mem">--</div>
+                </div>
+                <div>
+                    <label>Cost</label>
+                    <div id="hud-cost">$ --</div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    </main>
 
 <script>
-    // --- Logic for the Enhanced Section ---
+    // --- State ---
+    let joints = [
+        { id: 1, x: 0, y: 0 }, { id: 2, x: 10, y: 0 }, { id: 3, x: 20, y: 0 },
+        { id: 4, x: 15, y: 10 }, { id: 5, x: 30, y: 0 }
+    ];
+    let members = [
+        { id: 1, j1: 1, j2: 4 }, { id: 2, j1: 1, j2: 2 }, { id: 3, j1: 2, j2: 4 },
+        { id: 4, j1: 2, j2: 3 }, { id: 5, j1: 4, j2: 3 }, { id: 6, j1: 4, j2: 5 },
+        { id: 7, j1: 3, j2: 5 }
+    ];
+    let config = { pin: 1, roller: 5, loadJoint: 4, loadVal: 32 };
 
-    function updateInspector() {
-        const target = document.getElementById('inspector-content');
-        const raw = document.getElementById('json-input').value;
+    // --- Core Constants ---
+    const C_FIT = 37.5, L_O = 10.0, ALPHA = 2.0;
+    const COST_LEN = 301, COST_JOINT = 3010;
 
-        try {
-            const data = JSON.parse(raw);
-            const J = data.X.length;
-            const M = data.C[0].length;
+    // --- GUI Management ---
+    function updateUILists() {
+        const jList = document.getElementById('joint-list');
+        jList.innerHTML = joints.map(j => `
+            <div class="list-row">
+                <span>J${j.id}</span>
+                <span>${j.x}"</span>
+                <span>${j.y}"</span>
+                <button class="btn-danger" onclick="removeJoint(${j.id})">×</button>
+            </div>
+        `).join('');
 
-            let html = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem;">
-                    <div class="metric-card" style="padding: 10px;">
-                        <div class="metric-label">Joints (J)</div>
-                        <div class="metric-value" style="font-size: 1.2rem; color: #f8fafc;">${J}</div>
-                    </div>
-                    <div class="metric-card" style="padding: 10px;">
-                        <div class="metric-label">Members (M)</div>
-                        <div class="metric-value" style="font-size: 1.2rem; color: #f8fafc;">${M}</div>
-                    </div>
-                </div>
-                
-                <h4 style="font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 0.5rem;">COORDINATE MAP</h4>
-                <table style="width:100%; font-size: 0.8rem; margin-bottom: 1.5rem;">
-                    <tr style="color: var(--text-muted);"><th>ID</th><th>X (in)</th><th>Y (in)</th><th>Load (oz)</th></tr>
-            `;
+        const mList = document.getElementById('member-list');
+        mList.innerHTML = members.map(m => `
+            <div class="list-row">
+                <span>m${m.id}</span>
+                <span>J${m.j1}</span>
+                <span>J${m.j2}</span>
+                <button class="btn-danger" onclick="removeMember(${m.id})">×</button>
+            </div>
+        `).join('');
 
-            for (let i = 0; i < J; i++) {
-                const loadY = data.L[i + J] || 0;
-                const loadStyle = loadY < 0 ? 'color: #ef4444; font-weight: bold;' : '';
-                html += `
-                    <tr>
-                        <td>J${i+1}</td>
-                        <td>${data.X[i]}</td>
-                        <td>${data.Y[i]}</td>
-                        <td style="${loadStyle}">${loadY !== 0 ? loadY + ' ↓' : '--'}</td>
-                    </tr>
-                `;
-            }
+        // Update dropdowns
+        const selects = ['new-m1', 'new-m2', 'pin-select', 'roller-select', 'load-joint-select'];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            const val = el.value;
+            el.innerHTML = joints.map(j => `<option value="${j.id}">J${j.id}</option>`).join('');
+            if (val) el.value = val;
+        });
 
-            html += `</table><h4 style="font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 0.5rem;">SUPPORT CONFIGURATION</h4>`;
-            
-            // Basic support detection from Sy matrix
-            let supports = [];
-            for(let j=0; j<J; j++) {
-                if(data.Sy[j][1] === 1) supports.push(`J${j+1} (Pin)`);
-                else if(data.Sy[j][2] === 1) supports.push(`J${j+1} (Roller)`);
-            }
-            
-            html += `<p style="font-size: 0.85rem;">${supports.join(' & ') || 'No supports detected'}</p>`;
-            
-            target.innerHTML = html;
-        } catch (e) {
-            target.innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 4px;">
-                <strong>Invalid JSON Format:</strong><br>${e.message}
-            </div>`;
+        // Update Determinacy Status
+        const badge = document.getElementById('status-badge');
+        const isDet = (members.length === 2 * joints.length - 3);
+        badge.className = `status-badge ${isDet ? 'status-valid' : 'status-invalid'}`;
+        badge.innerText = isDet ? `Valid Determinacy (M=${members.length})` : `Invalid: M=${members.length}, Need ${2*joints.length-3}`;
+        
+        draw();
+    }
+
+    function addJointManual() {
+        const x = parseFloat(document.getElementById('new-jx').value);
+        const y = parseFloat(document.getElementById('new-jy').value);
+        if (!isNaN(x) && !isNaN(y)) {
+            const id = joints.length ? Math.max(...joints.map(j => j.id)) + 1 : 1;
+            joints.push({ id, x, y });
+            updateUILists();
         }
     }
 
-    function formatJSON() {
-        const input = document.getElementById('json-input');
+    function addMember() {
+        const j1 = parseInt(document.getElementById('new-m1').value);
+        const j2 = parseInt(document.getElementById('new-m2').value);
+        if (j1 === j2) return;
+        const id = members.length ? Math.max(...members.map(m => m.id)) + 1 : 1;
+        members.push({ id, j1, j2 });
+        updateUILists();
+    }
+
+    function removeJoint(id) {
+        joints = joints.filter(j => j.id !== id);
+        members = members.filter(m => m.j1 !== id && m.j2 !== id);
+        updateUILists();
+    }
+
+    function removeMember(id) {
+        members = members.filter(m => m.id !== id);
+        updateUILists();
+    }
+
+    // --- Solver ---
+    function runAnalysis() {
         try {
-            const obj = JSON.parse(input.value);
-            input.value = JSON.stringify(obj, null, 4);
-            updateInspector();
-        } catch (e) { alert("Cannot format: Invalid JSON"); }
+            const J = joints.length;
+            const M = members.length;
+            if (M !== 2 * J - 3) throw new Error("M = 2J - 3 not met.");
+
+            // Map IDs to 0-indexed
+            const idMap = {};
+            joints.forEach((j, i) => idMap[j.id] = i);
+
+            let A = Array.from({ length: 2 * J }, () => Array(M + 3).fill(0));
+            let L = new Array(2 * J).fill(0);
+            let lens = [];
+
+            members.forEach((m, i) => {
+                const j1 = joints[idMap[m.j1]], j2 = joints[idMap[m.j2]];
+                const dx = j2.x - j1.x, dy = j2.y - j1.y;
+                const len = Math.sqrt(dx*dx + dy*dy);
+                lens.push(len);
+
+                const u1 = idMap[m.j1], u2 = idMap[m.j2];
+                A[u1][i] = dx/len; A[u2][i] = -dx/len;
+                A[u1+J][i] = dy/len; A[u2+J][i] = -dy/len;
+            });
+
+            // Supports (Pin at J_pin, Roller at J_roll)
+            const pinIdx = idMap[parseInt(document.getElementById('pin-select').value)];
+            const rollIdx = idMap[parseInt(document.getElementById('roller-select').value)];
+            A[pinIdx][M] = 1;      // Rx1
+            A[pinIdx+J][M+1] = 1;  // Ry1
+            A[rollIdx+J][M+2] = 1; // Ry2
+
+            // Load
+            const loadIdx = idMap[parseInt(document.getElementById('load-joint-select').value)];
+            const val = parseFloat(document.getElementById('load-value').value);
+            L[loadIdx + J] = -val;
+
+            const res = math.lusolve(A, L).map(r => r[0]);
+            const forces = res.slice(0, M);
+
+            // Failure
+            let maxW = Infinity, critM = -1;
+            forces.forEach((f, i) => {
+                if (f < -1e-5) {
+                    const Pc = C_FIT * Math.pow(L_O / lens[i], ALPHA);
+                    const w_fail = Math.abs(Pc / (f / val));
+                    if (w_fail < maxW) { maxW = w_fail; critM = i; }
+                }
+            });
+
+            const totalLen = lens.reduce((a,b) => a+b, 0);
+            const cost = totalLen * COST_LEN + J * COST_JOINT;
+
+            document.getElementById('hud-max-load').innerText = maxW.toFixed(2) + " oz";
+            document.getElementById('hud-crit-mem').innerText = "Member " + members[critM].id;
+            document.getElementById('hud-cost').innerText = "$ " + cost.toLocaleString();
+
+            draw(forces, critM);
+        } catch (e) {
+            alert(e.message);
+        }
     }
 
-    function clearInput() {
-        document.getElementById('json-input').value = "";
-        updateInspector();
+    // --- Visualization ---
+    const canvas = document.getElementById('trussCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function draw(forces = [], critIdx = -1) {
+        const w = canvas.width = canvas.parentElement.clientWidth;
+        const h = canvas.height = canvas.parentElement.clientHeight;
+        ctx.clearRect(0,0,w,h);
+
+        if (!joints.length) return;
+
+        const scale = 20, ox = 100, oy = h - 100;
+        const getP = (j) => ({ x: ox + j.x * scale, y: oy - j.y * scale });
+
+        // Draw Members
+        members.forEach((m, i) => {
+            const p1 = getP(joints.find(j => j.id === m.j1));
+            const p2 = getP(joints.find(j => j.id === m.j2));
+            
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            
+            if (i === critIdx) { ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; }
+            else if (forces[i] > 0.1) { ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; }
+            else if (forces[i] < -0.1) { ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; }
+            else { ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; }
+            ctx.stroke();
+        });
+
+        // Draw Joints
+        joints.forEach(j => {
+            const p = getP(j);
+            ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 7);
+            ctx.fillStyle = (j.id == document.getElementById('pin-select').value) ? '#ef4444' : '#f8fafc';
+            ctx.fill();
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText(`J${j.id}`, p.x + 8, p.y - 8);
+        });
     }
 
-    // Initialize with sample data if needed
-    window.addEventListener('load', () => {
-        // Assuming loadSampleData() from your previous script is available
-        if (typeof loadSampleData === 'function') loadSampleData();
-        updateInspector();
+    // Canvas Interaction
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const rawX = (e.clientX - rect.left - 100) / 20;
+        const rawY = (canvas.height - (e.clientY - rect.top) - 100) / 20;
+        
+        // Snap to grid
+        const x = Math.round(rawX);
+        const y = Math.round(rawY);
+
+        const id = joints.length ? Math.max(...joints.map(j => j.id)) + 1 : 1;
+        joints.push({ id, x, y });
+        updateUILists();
     });
+
+    window.onload = updateUILists;
 </script>
+</body>
+</html>
