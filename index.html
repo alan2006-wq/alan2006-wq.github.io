@@ -1,14 +1,691 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Truss GUI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EK301 Truss Analysis Dashboard</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.7);
+            --bg-input: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --accent-green: #10b981;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --panel-blur: blur(12px);
+            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: var(--panel-blur);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.5px; }
+        header p { color: var(--text-muted); font-size: 0.9rem; }
+
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: var(--panel-blur);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--accent-blue);
+        }
+
+        /* Input Section */
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: var(--bg-input);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        textarea:focus { outline: none; border-color: var(--accent-blue); }
+
+        .btn-group { display: flex; gap: 0.5rem; }
+
+        button {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-primary:hover { background: var(--accent-blue-hover); }
+        .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.05); }
+
+        /* Error Banner */
+        #error-banner {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--accent-red);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        /* Metrics Summary */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .metric-value { font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0; }
+        .metric-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .val-critical { color: var(--accent-red); }
+        .val-good { color: var(--accent-green); }
+        .val-neutral { color: var(--accent-blue); }
+
+        /* Visualization Area */
+        .vis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1400px) {
+            .vis-grid { grid-template-columns: 1fr; }
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 350px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        canvas { width: 100%; height: 100%; border-radius: 8px; }
+
+        /* Table */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-weight: 600; position: sticky; top: 0; background: var(--bg-panel); }
+        tr:hover { background: rgba(255, 255, 255, 0.02); }
+        
+        .tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .tag-t { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .tag-c { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .tag-z { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+        .tag-crit { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid var(--accent-red); }
+        
+        /* Legends */
+        .legend { display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 0.25rem; }
+        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+    </style>
 </head>
 <body>
 
-<h1>My Truss App</h1>
+    <header>
+        <div>
+            <h1>EK301 Truss Analysis Tool</h1>
+            <p>Preliminary Design Computational Model Verification</p>
+        </div>
+        <div>
+            <p>Spring 2026 Spec | M = 2J - 3</p>
+        </div>
+    </header>
 
-<input type="number" placeholder="Enter Load">
-<button onclick="alert('Running analysis soon')">Analyze</button>
+    <div class="container">
+        <div class="panel">
+            <h2 class="panel-title">Data Input (.mat JSON Proxy)</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Since browsers cannot natively parse binary MATLAB .mat files securely, paste your structural data as a JSON object below.
+            </p>
+            <textarea id="json-input" spellcheck="false" placeholder="Paste your JSON configuration here..."></textarea>
+            <div class="btn-group">
+                <button class="btn-secondary" onclick="loadSampleData()">Load Sample Truss</button>
+                <button class="btn-primary" onclick="runAnalysis()">Run Analysis</button>
+            </div>
+        </div>
 
+        <div class="panel" style="flex: 1;">
+            <div id="error-banner"></div>
+
+            <h2 class="panel-title">Analysis Results</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Max Theoretical Load</div>
+                    <div class="metric-value val-critical" id="met-max-load">-- oz</div>
+                    <div class="metric-label" id="met-load-unc">+/- -- oz</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Critical Member</div>
+                    <div class="metric-value val-neutral" id="met-crit-mem">--</div>
+                    <div class="metric-label" id="met-crit-len">Length: -- in</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Cost</div>
+                    <div class="metric-value val-good" id="met-cost">$ --</div>
+                    <div class="metric-label">EK301 Currency</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Load-to-Cost Ratio</div>
+                    <div class="metric-value val-neutral" id="met-ratio">--</div>
+                    <div class="metric-label">oz / $</div>
+                </div>
+            </div>
+
+            <div class="vis-grid">
+                <div>
+                    <div class="canvas-container">
+                        <canvas id="trussCanvas"></canvas>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-color" style="background: #3b82f6;"></div> Tension</div>
+                        <div class="legend-item"><div class="legend-color" style="background: #f59e0b;"></div> Compression</div>
+                        <div class="legend-item"><div class="legend-color" style="background: #ef4444;"></div> Critical</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="canvas-container" style="padding: 1rem;">
+                        <canvas id="forceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Length (in)</th>
+                            <th>Force (oz)</th>
+                            <th>State</th>
+                            <th>P_crit (oz)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+            
+            <h3 class="panel-title" style="margin-top: 1.5rem; font-size: 1rem;">Reaction Forces</h3>
+            <div class="table-container">
+                <table id="reactions-table">
+                    <thead>
+                        <tr>
+                            <th>Reaction ID</th>
+                            <th>Value (oz)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    // --- Global Chart Instance ---
+    let forceChartInstance = null;
+
+    // --- Core Constants (Spring 2026 Spec) ---
+    const C_FIT = 37.5;
+    const L_O = 10.0;
+    const ALPHA = 2.0;
+    const U_FIT = 10.0;
+    const COST_LEN_MULTIPLIER = 301;
+    const COST_JOINT_MULTIPLIER = 3010;
+
+    // --- Sample Data Injection ---
+    function loadSampleData() {
+        // A valid statically determinate truss spanning 30 inches, load at center.
+        // 5 Joints, 7 Members (M = 2J - 3 -> 7 = 10 - 3)
+        const sample = {
+            "C": [
+                [1, 0, 0, 1, 0, 0, 0], // J1 (0,0) Pin
+                [1, 1, 0, 0, 1, 0, 0], // J2 (10,0)
+                [0, 1, 1, 0, 0, 1, 0], // J3 (20,0)
+                [0, 0, 0, 1, 1, 1, 1], // J4 (15,10) Load Joint
+                [0, 0, 1, 0, 0, 0, 1]  // J5 (30,0) Roller
+            ],
+            "Sx": [
+                [1, 0, 0], // J1 Rx
+                [0, 0, 0], // J2
+                [0, 0, 0], // J3
+                [0, 0, 0], // J4
+                [0, 0, 0]  // J5
+            ],
+            "Sy": [
+                [0, 1, 0], // J1 Ry1
+                [0, 0, 0], // J2
+                [0, 0, 0], // J3
+                [0, 0, 0], // J4
+                [0, 0, 1]  // J5 Ry2
+            ],
+            "X": [0, 10, 20, 15, 30],
+            "Y": [0, 0, 0, 10, 0],
+            "L": [
+                0, 0, 0, 0, 0,   // Fx components
+                0, 0, 0, -32, 0  // Fy components (32 oz load down at J4)
+            ]
+        };
+        document.getElementById('json-input').value = JSON.stringify(sample, null, 2);
+    }
+
+    // --- Main Execution Logic ---
+    function runAnalysis() {
+        const errorBanner = document.getElementById('error-banner');
+        errorBanner.style.display = 'none';
+
+        try {
+            // 1. Parse Input
+            const rawText = document.getElementById('json-input').value;
+            if (!rawText.trim()) throw new Error("Input is empty. Please load sample data or paste JSON.");
+            const data = JSON.parse(rawText);
+
+            // 2. Extract & Validate
+            const { C, Sx, Sy, X, Y, L } = data;
+            if (!C || !Sx || !Sy || !X || !Y || !L) throw new Error("Missing required matrices in JSON (Need C, Sx, Sy, X, Y, L).");
+
+            const J = X.length;
+            const M = C[0].length;
+
+            if (M !== 2 * J - 3) {
+                throw new Error(`Truss is not a simple planar truss (M=2J-3 failed). M=${M}, 2J-3=${2*J-3}`);
+            }
+
+            // 3. Compute Lengths and Build Equilibrium Matrix A
+            let A = Array.from({ length: 2 * J }, () => Array(M + 3).fill(0));
+            let lengths = new Array(M).fill(0);
+            let memberJoints = [];
+
+            for (let m = 0; m < M; m++) {
+                let connected = [];
+                for (let j = 0; j < J; j++) {
+                    if (C[j][m] === 1) connected.push(j);
+                }
+                if (connected.length !== 2) throw new Error(`Member ${m+1} does not connect exactly 2 joints.`);
+                
+                let j1 = connected[0];
+                let j2 = connected[1];
+                memberJoints.push({j1, j2});
+
+                let dx = X[j2] - X[j1];
+                let dy = Y[j2] - Y[j1];
+                let len = Math.sqrt(dx*dx + dy*dy);
+                if (len === 0) throw new Error(`Member ${m+1} has length 0.`);
+                lengths[m] = len;
+
+                // X-Equilibrium (rows 0 to J-1)
+                A[j1][m] = dx / len;
+                A[j2][m] = -dx / len;
+
+                // Y-Equilibrium (rows J to 2J-1)
+                A[j1 + J][m] = dy / len;
+                A[j2 + J][m] = -dy / len;
+            }
+
+            // Append Reactions
+            for (let j = 0; j < J; j++) {
+                for (let r = 0; r < 3; r++) {
+                    A[j][M + r] = Sx[j][r];
+                    A[j + J][M + r] = Sy[j][r];
+                }
+            }
+
+            // 4. Solve System A * T = L
+            // math.lusolve returns an array of column arrays (e.g., [[t1], [t2], ...])
+            let res;
+            try {
+                res = math.lusolve(A, L);
+            } catch (err) {
+                throw new Error("Equilibrium matrix is singular. Check support placement or truss stability.");
+            }
+            
+            const T_all = res.map(row => row[0]); // Flatten
+            const forces = T_all.slice(0, M);
+            const reactions = T_all.slice(M, M + 3);
+
+            // 5. Failure Analysis
+            // Compute applied reference load (sum of absolute y-axis external loads)
+            let w_applied = 0;
+            for(let i=J; i<2*J; i++) w_applied += Math.abs(L[i]);
+            if(w_applied === 0) throw new Error("No external load applied in Y-direction.");
+
+            let max_theoretical_load = Infinity;
+            let critical_member = -1;
+            let p_crits = new Array(M).fill(0);
+            let fail_loads = new Array(M).fill(Infinity);
+
+            for(let m = 0; m < M; m++) {
+                if (forces[m] < -1e-5) { // In compression
+                    // P_crit formula
+                    let P_c = C_FIT * Math.pow((L_O / lengths[m]), ALPHA);
+                    p_crits[m] = P_c;
+
+                    let R_m = forces[m] / w_applied; // linearity ratio
+                    let w_fail = -P_c / R_m;
+                    fail_loads[m] = w_fail;
+
+                    if (w_fail < max_theoretical_load) {
+                        max_theoretical_load = w_fail;
+                        critical_member = m;
+                    }
+                }
+            }
+
+            if (critical_member === -1) {
+                throw new Error("No members in compression. Truss will theoretically not buckle.");
+            }
+
+            let R_c_crit = forces[critical_member] / w_applied;
+            let load_uncertainty = Math.abs(U_FIT / R_c_crit);
+
+            // 6. Cost Calculation
+            let total_length = lengths.reduce((a, b) => a + b, 0);
+            let cost = COST_LEN_MULTIPLIER * total_length + COST_JOINT_MULTIPLIER * J;
+            let load_to_cost = max_theoretical_load / cost;
+
+            // 7. Update UI
+            updateDashboard({
+                M, J, X, Y, forces, reactions, lengths, memberJoints, 
+                critical_member, p_crits, max_theoretical_load, load_uncertainty, cost, load_to_cost
+            });
+
+        } catch (error) {
+            errorBanner.textContent = "Error: " + error.message;
+            errorBanner.style.display = 'block';
+            console.error(error);
+        }
+    }
+
+    function updateDashboard(data) {
+        // --- Metrics ---
+        document.getElementById('met-max-load').textContent = data.max_theoretical_load.toFixed(2) + " oz";
+        document.getElementById('met-load-unc').textContent = "+/- " + data.load_uncertainty.toFixed(2) + " oz";
+        document.getElementById('met-crit-mem').textContent = "m" + (data.critical_member + 1);
+        document.getElementById('met-crit-len').textContent = "Length: " + data.lengths[data.critical_member].toFixed(2) + " in";
+        document.getElementById('met-cost').textContent = "$ " + data.cost.toFixed(2);
+        document.getElementById('met-ratio').textContent = data.load_to_cost.toFixed(6);
+
+        // --- Render Canvas Truss Diagram ---
+        drawTrussDiagram(data);
+
+        // --- Render Force Chart ---
+        drawForceChart(data);
+
+        // --- Render Tables ---
+        const tbody = document.querySelector('#results-table tbody');
+        tbody.innerHTML = '';
+        for(let i=0; i<data.M; i++) {
+            let f = data.forces[i];
+            let stateClass = 'tag-z';
+            let stateLabel = 'Zero';
+            if (f > 1e-5) { stateClass = 'tag-t'; stateLabel = 'Tension'; }
+            else if (f < -1e-5) { stateClass = 'tag-c'; stateLabel = 'Comp'; }
+
+            let isCrit = (i === data.critical_member);
+            let pcritText = (f < -1e-5) ? data.p_crits[i].toFixed(2) + " ± 10" : "--";
+            let statusBadge = isCrit ? `<span class="tag tag-crit">Critical</span>` : "";
+
+            let tr = `<tr>
+                <td>m${i+1}</td>
+                <td>${data.lengths[i].toFixed(2)}</td>
+                <td style="font-family: monospace;">${Math.abs(f).toFixed(3)}</td>
+                <td><span class="tag ${stateClass}">${stateLabel}</span></td>
+                <td>${pcritText}</td>
+                <td>${statusBadge}</td>
+            </tr>`;
+            tbody.innerHTML += tr;
+        }
+
+        const rtbody = document.querySelector('#reactions-table tbody');
+        rtbody.innerHTML = '';
+        ['Sx1', 'Sy1', 'Sy2'].forEach((label, i) => {
+            rtbody.innerHTML += `<tr>
+                <td>${label}</td>
+                <td style="font-family: monospace;">${data.reactions[i].toFixed(3)}</td>
+            </tr>`;
+        });
+    }
+
+    function drawTrussDiagram(data) {
+        const canvas = document.getElementById('trussCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Setup scaling to fit container high DPI
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * 2; 
+        canvas.height = rect.height * 2;
+        ctx.scale(2, 2);
+        const w = rect.width;
+        const h = rect.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Find bounding box
+        let minX = Math.min(...data.X), maxX = Math.max(...data.X);
+        let minY = Math.min(...data.Y), maxY = Math.max(...data.Y);
+        let rangeX = maxX - minX || 1;
+        let rangeY = maxY - minY || 1;
+
+        // Margins and scale
+        const margin = 50;
+        const scaleX = (w - margin * 2) / rangeX;
+        const scaleY = (h - margin * 2) / rangeY;
+        const scale = Math.min(scaleX, scaleY);
+
+        const offsetX = (w - rangeX * scale) / 2 - minX * scale;
+        // Invert Y axis for drawing
+        const offsetY = h - (h - rangeY * scale) / 2 + minY * scale; 
+
+        const getPt = (idx) => ({
+            x: data.X[idx] * scale + offsetX,
+            y: offsetY - data.Y[idx] * scale 
+        });
+
+        // Draw Members
+        ctx.lineCap = 'round';
+        data.memberJoints.forEach((m, idx) => {
+            let pt1 = getPt(m.j1);
+            let pt2 = getPt(m.j2);
+            let isCrit = (idx === data.critical_member);
+            let force = data.forces[idx];
+
+            ctx.beginPath();
+            ctx.moveTo(pt1.x, pt1.y);
+            ctx.lineTo(pt2.x, pt2.y);
+            
+            if (isCrit) {
+                ctx.strokeStyle = '#ef4444'; // Red
+                ctx.lineWidth = 6;
+            } else if (force > 1e-5) {
+                ctx.strokeStyle = '#3b82f6'; // Blue (Tension)
+                ctx.lineWidth = 3;
+            } else if (force < -1e-5) {
+                ctx.strokeStyle = '#f59e0b'; // Orange (Compression)
+                ctx.lineWidth = 3;
+            } else {
+                ctx.strokeStyle = '#9ca3af'; // Gray
+                ctx.lineWidth = 2;
+            }
+            ctx.stroke();
+
+            // Label Member
+            let mx = (pt1.x + pt2.x) / 2;
+            let my = (pt1.y + pt2.y) / 2;
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(mx - 12, my - 10, 24, 20);
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`m${idx+1}`, mx, my);
+        });
+
+        // Draw Joints
+        for (let j = 0; j < data.J; j++) {
+            let pt = getPt(j);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 6, 0, 2 * Math.PI);
+            ctx.fillStyle = '#0f172a';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.stroke();
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`J${j+1}`, pt.x + 10, pt.y - 10);
+        }
+    }
+
+    function drawForceChart(data) {
+        const ctx = document.getElementById('forceChart').getContext('2d');
+        
+        if (forceChartInstance) {
+            forceChartInstance.destroy();
+        }
+
+        const labels = data.forces.map((_, i) => `m${i+1}`);
+        const backgroundColors = data.forces.map((f, i) => {
+            if (i === data.critical_member) return '#ef4444'; // Red
+            if (f > 1e-5) return '#3b82f6'; // Blue
+            if (f < -1e-5) return '#f59e0b'; // Orange
+            return '#9ca3af'; // Gray
+        });
+
+        forceChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Internal Force (oz)',
+                    data: data.forces,
+                    backgroundColor: backgroundColors,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                let val = ctx.raw;
+                                let type = val > 0 ? '(T)' : (val < 0 ? '(C)' : '(Z)');
+                                return `${Math.abs(val).toFixed(2)} oz ${type}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: 'Force (oz)', color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Auto-load sample on startup
+    window.onload = loadSampleData;
+
+</script>
 </body>
 </html>
