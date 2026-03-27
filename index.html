@@ -2,166 +2,396 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EK301 Truss Designer - Spring 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EK301 Interactive Truss Designer</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+
     <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 900px; margin: auto; padding: 20px; background: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1, h2 { color: #003366; }
-        .input-group { margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        textarea { width: 100%; height: 80px; font-family: monospace; }
-        button { background: #003366; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-        button:hover { background: #0055aa; }
-        #results { margin-top: 20px; padding: 15px; background: #eef; border-left: 5px solid #003366; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #f2f2f2; }
+        :root {
+            --bg-base: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.8);
+            --bg-input: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --accent-green: #10b981;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex; height: 100vh; overflow: hidden;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .sidebar-section { padding: 1.25rem; border-bottom: 1px solid var(--border-color); }
+        .sidebar-title { font-size: 0.9rem; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 1rem; display: flex; justify-content: space-between; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: #020617; }
+        
+        #canvas-wrapper {
+            flex: 1;
+            position: relative;
+            cursor: crosshair;
+            background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .input-group { margin-bottom: 0.75rem; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        input, select {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border-color);
+            color: white; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;
+            border: none; transition: 0.2s;
+        }
+        .btn-add { background: var(--accent-blue); color: white; width: 100%; }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.25rem 0.5rem; border: none; cursor: pointer;}
+        
+        .hud {
+            position: absolute; bottom: 2rem; right: 2rem;
+            background: rgba(15, 23, 42, 0.9); padding: 1.5rem; border-radius: 12px;
+            border: 1px solid var(--border-color); min-width: 250px; pointer-events: none;
+        }
+
+        .item-list { max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
+        .list-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr 40px; gap: 0.5rem;
+            align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .status-badge {
+            position: absolute; top: 1rem; right: 1rem; padding: 0.5rem 1rem;
+            border-radius: 20px; font-weight: bold; font-size: 0.75rem; z-index: 10;
+        }
+        .status-valid { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .status-invalid { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>EK301 Truss Analysis Tool</h1>
-    <p>Spring 2026 Specifications [cite: 501, 896]</p>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2 style="font-size: 1.2rem;">Truss Workshop</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Spring 2026 Analysis Engine</p>
+        </div>
 
-    <div class="input-group">
-        <label>Joint Locations (X, Y in inches):</label>
-        <p><small>Format: x1,y1; x2,y2; ... (Example: 0,0; 8,2; 30,0)</small></p>
-        <textarea id="jointsInput">0,0; 8,2; 30,0</textarea>
-    </div>
+        <section class="sidebar-section">
+            <div class="sidebar-title">Joints <span>(Click canvas to add)</span></div>
+            <div class="item-list" id="joint-list"></div>
+            <div style="margin-top:1rem; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem;">
+                <input type="number" id="new-jx" placeholder="X (in)">
+                <input type="number" id="new-jy" placeholder="Y (in)">
+                <button class="btn btn-add" onclick="addJointManual()">Add</button>
+            </div>
+        </section>
 
-    <div class="input-group">
-        <label>Member Connections (Joint IDs):</label>
-        <p><small>Format: J1,J2; J2,J3; ... (Indices start at 1)</small></p>
-        <textarea id="membersInput">1,2; 2,3; 1,3</textarea>
-    </div>
+        <section class="sidebar-section">
+            <div class="sidebar-title">Members</div>
+            <div class="item-list" id="member-list"></div>
+            <div style="margin-top:1rem; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.5rem;">
+                <select id="new-m1"></select>
+                <select id="new-m2"></select>
+                <button class="btn btn-add" onclick="addMember()">Link</button>
+            </div>
+        </section>
 
-    <div class="input-group">
-        <label>Supports & Load:</label>
-        <p>Pin Joint ID: <input type="number" id="pinIdx" value="1"> 
-           Roller Joint ID: <input type="number" id="rollIdx" value="3"></p>
-        <p>Load Joint ID: <input type="number" id="loadIdx" value="2"> 
-           Load Magnitude (W in oz): <input type="number" id="loadVal" value="32"></p>
-    </div>
+        <section class="sidebar-section">
+            <div class="sidebar-title">Loads & Supports</div>
+            <div class="input-group">
+                <label>External Load (oz) at Selected Joint</label>
+                <div style="display:flex; gap:0.5rem;">
+                    <select id="load-joint-select"></select>
+                    <input type="number" id="load-value" value="32">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Pin Support (Sx, Sy)</label>
+                <select id="pin-select"></select>
+            </div>
+            <div class="input-group">
+                <label>Roller Support (Sy)</label>
+                <select id="roller-select"></select>
+            </div>
+            <button class="btn btn-add" style="background: var(--accent-orange);" onclick="runAnalysis()">Solve Truss</button>
+        </section>
+    </aside>
 
-    <button onclick="analyzeTruss()">Analyze Design</button>
+    <main class="main-content">
+        <div id="status-badge" class="status-badge status-invalid">M = 2J - 3 Requirement</div>
+        <div id="canvas-wrapper">
+            <canvas id="trussCanvas"></canvas>
+        </div>
 
-    <div id="results" style="display:none;">
-        <h2>Analysis Results</h2>
-        <div id="summary"></div>
-        <table id="memberTable">
-            <thead>
-                <tr>
-                    <th>Member</th>
-                    <th>Force (oz)</th>
-                    <th>Type</th>
-                    <th>Length (in)</th>
-                    <th>Buckling Limit (oz)</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-</div>
+        <div class="hud">
+            <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Results</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;" id="hud-max-load">-- oz</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label>Critical Member</label>
+                    <div id="hud-crit-mem">--</div>
+                </div>
+                <div>
+                    <label>Total Cost</label>
+                    <div id="hud-cost">$ --</div>
+                </div>
+            </div>
+        </div>
+    </main>
 
 <script>
-function analyzeTruss() {
-    try {
-        // 1. Parse Inputs
-        const joints = document.getElementById('jointsInput').value.trim().split(';').map(s => s.split(',').map(Number));
-        const members = document.getElementById('membersInput').value.trim().split(';').map(s => s.split(',').map(Number));
-        const P = parseInt(document.getElementById('pinIdx').value) - 1;
-        const R = parseInt(document.getElementById('rollIdx').value) - 1;
-        const L_idx = parseInt(document.getElementById('loadIdx').value) - 1;
-        const W = parseFloat(document.getElementById('loadVal').value);
+    // --- State Management ---
+    let joints = [
+        { id: 1, x: 0, y: 0 }, { id: 2, x: 15, y: 2 }, { id: 3, x: 30, y: 0 }
+    ];
+    let members = [
+        { id: 1, j1: 1, j2: 2 }, { id: 2, j1: 2, j2: 3 }, { id: 3, j1: 1, j2: 3 }
+    ];
+    
+    // Project Constraints (Spring 2026)
+    const C_FIT = 37.5, L_O = 10.0, ALPHA = 2.0;
+    const COST_PER_INCH = 1, COST_PER_JOINT = 10;
 
-        const J = joints.length;
-        const M = members.length;
+    // --- UI Update Helpers ---
+    function updateUILists() {
+        const jList = document.getElementById('joint-list');
+        jList.innerHTML = joints.map(j => `
+            <div class="list-row">
+                <span>J${j.id}</span>
+                <span>${j.x}"</span>
+                <span>${j.y}"</span>
+                <button class="btn-danger" onclick="removeJoint(${j.id})">×</button>
+            </div>
+        `).join('');
 
-        // 2. Validate M = 2J - 3 [cite: 574, 630]
-        if (M !== 2 * J - 3) {
-            alert(`Constraint Error: M must be 2J - 3. Current: M=${M}, J=${J}`);
-            return;
-        }
+        const mList = document.getElementById('member-list');
+        mList.innerHTML = members.map(m => `
+            <div class="list-row">
+                <span>m${m.id}</span>
+                <span>J${m.j1}</span>
+                <span>J${m.j2}</span>
+                <button class="btn-danger" onclick="removeMember(${m.id})">×</button>
+            </div>
+        `).join('');
 
-        // 3. Construct Matrix A and Vector L [cite: 767, 769]
-        let A = math.zeros(2 * J, M + 3);
-        let LoadVec = math.zeros(2 * J, 1);
-        LoadVec._data[J + L_idx][0] = -W; // Vertical load at joint L_idx [cite: 713]
-
-        // Populate member coefficients in A [cite: 769, 771]
-        members.forEach((m, i) => {
-            const j1 = m[0] - 1;
-            const j2 = m[1] - 1;
-            const dx = joints[j2][0] - joints[j1][0];
-            const dy = joints[j2][1] - joints[j1][1];
-            const L = Math.sqrt(dx*dx + dy*dy);
-
-            // Joint 1 components
-            A._data[j1][i] = dx / L;
-            A._data[J + j1][i] = dy / L;
-            // Joint 2 components (opposite direction)
-            A._data[j2][i] = -dx / L;
-            A._data[J + j2][i] = -dy / L;
+        const selects = ['new-m1', 'new-m2', 'pin-select', 'roller-select', 'load-joint-select'];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            const currentVal = el.value;
+            el.innerHTML = joints.map(j => `<option value="${j.id}">J${j.id}</option>`).join('');
+            if (currentVal) el.value = currentVal;
         });
 
-        // Reaction Force Columns [cite: 690-707]
-        A._data[P][M] = 1;     // Sx (Pin x)
-        A._data[J + P][M + 1] = 1; // Sy (Pin y)
-        A._data[J + R][M + 2] = 1; // Sy (Roller y)
-
-        // 4. Solve T = -A^-1 * L 
-        const T = math.multiply(math.multiply(math.inv(A), LoadVec), -1);
-
-        // 5. Calculate Cost and Buckling [cite: 583, 897]
-        let totalLength = 0;
-        let outputRows = "";
-        let criticalW = Infinity;
-        let criticalMember = -1;
-
-        members.forEach((m, i) => {
-            const dx = joints[m[1]-1][0] - joints[m[0]-1][0];
-            const dy = joints[m[1]-1][1] - joints[m[0]-1][1];
-            const len = Math.sqrt(dx*dx + dy*dy);
-            totalLength += len;
-
-            const force = T._data[i][0];
-            const type = force < 0 ? "Compression (C)" : "Tension (T)";
-            
-            // Buckling Formula Spring 2026: F = 37.5 * (10/L)^2 [cite: 897, 901-904]
-            const F_buckle = 37.5 * Math.pow(10 / len, 2);
-            
-            // Critical Load Calculation [cite: 929-932]
-            if (force < 0) {
-                const failureW = (F_buckle / Math.abs(force)) * W;
-                if (failureW < criticalW) {
-                    criticalW = failureW;
-                    criticalMember = i + 1;
-                }
-            }
-
-            outputRows += `<tr><td>m${i+1}</td><td>${Math.abs(force).toFixed(3)}</td><td>${type}</td><td>${len.toFixed(2)}</td><td>${force < 0 ? F_buckle.toFixed(2) : '-'}</td></tr>`;
-        });
-
-        // Cost Formula: C = 1*L + 10*J 
-        const cost = (1 * totalLength) + (10 * J);
-
-        // 6. Display Results
-        document.getElementById('summary').innerHTML = `
-            <p><b>Total Cost:</b> $${cost.toFixed(2)} [cite: 583]</p>
-            <p><b>Total Material:</b> ${(totalLength/12).toFixed(2)} ft (Limit: 10 ft) </p>
-            <p><b>Theoretical Max Load:</b> ${criticalW.toFixed(2)} oz [cite: 911]</p>
-            <p><b>Critical Member:</b> m${criticalMember} [cite: 910]</p>
-            <p><b>Max Load/Cost Ratio:</b> ${(criticalW / cost).toFixed(4)} oz/$ [cite: 951]</p>
-        `;
-        document.querySelector('#memberTable tbody').innerHTML = outputRows;
-        document.getElementById('results').style.display = "block";
-
-    } catch (err) {
-        alert("Error in analysis: " + err.message);
+        // Determinacy Check
+        const badge = document.getElementById('status-badge');
+        const isDet = (members.length === 2 * joints.length - 3);
+        badge.className = `status-badge ${isDet ? 'status-valid' : 'status-invalid'}`;
+        badge.innerText = isDet ? `Statically Determinate (M=${members.length})` : `Requirement Failed: M=${members.length}, Need ${2*joints.length-3}`;
+        
+        draw();
     }
-}
+
+    function addJointManual() {
+        const x = parseFloat(document.getElementById('new-jx').value);
+        const y = parseFloat(document.getElementById('new-jy').value);
+        if (!isNaN(x) && !isNaN(y)) {
+            const id = joints.length ? Math.max(...joints.map(j => j.id)) + 1 : 1;
+            joints.push({ id, x, y });
+            updateUILists();
+        }
+    }
+
+    function addMember() {
+        const j1 = parseInt(document.getElementById('new-m1').value);
+        const j2 = parseInt(document.getElementById('new-m2').value);
+        if (j1 === j2) return;
+        const id = members.length ? Math.max(...members.map(m => m.id)) + 1 : 1;
+        members.push({ id, j1, j2 });
+        updateUILists();
+    }
+
+    function removeJoint(id) {
+        joints = joints.filter(j => j.id !== id);
+        members = members.filter(m => m.j1 !== id && m.j2 !== id);
+        updateUILists();
+    }
+
+    function removeMember(id) {
+        members = members.filter(m => m.id !== id);
+        updateUILists();
+    }
+
+    // --- Core Math Solver ---
+    function runAnalysis() {
+        try {
+            const J = joints.length;
+            const M = members.length;
+            if (M !== 2 * J - 3) throw new Error("Statically indeterminate. M must equal 2J - 3.");
+
+            // Map IDs to indices for matrix math
+            const idMap = {};
+            joints.forEach((j, i) => idMap[j.id] = i);
+
+            let A = math.zeros(2 * J, M + 3);
+            let LoadVec = math.zeros(2 * J, 1);
+            let lengths = [];
+
+            // Populate Member coefficients
+            members.forEach((m, i) => {
+                const j1 = joints[idMap[m.j1]];
+                const j2 = joints[idMap[m.j2]];
+                const dx = j2.x - j1.x;
+                const dy = j2.y - j1.y;
+                const L = Math.sqrt(dx*dx + dy*dy);
+                lengths.push(L);
+
+                const u1 = idMap[m.j1], u2 = idMap[m.j2];
+                // X components
+                A._data[u1][i] = dx/L;
+                A._data[u2][i] = -dx/L;
+                // Y components
+                A._data[u1 + J][i] = dy/L;
+                A._data[u2 + J][i] = -dy/L;
+            });
+
+            // Reaction Force Columns
+            const pinIdx = idMap[parseInt(document.getElementById('pin-select').value)];
+            const rollIdx = idMap[parseInt(document.getElementById('roller-select').value)];
+            
+            A._data[pinIdx][M] = 1;         // Pin Rx
+            A._data[pinIdx + J][M + 1] = 1; // Pin Ry
+            A._data[rollIdx + J][M + 2] = 1; // Roller Ry
+
+            // Apply Load (vertical downward)
+            const loadJointId = parseInt(document.getElementById('load-joint-select').value);
+            const loadValue = parseFloat(document.getElementById('load-value').value);
+            LoadVec._data[idMap[loadJointId] + J][0] = -loadValue;
+
+            // Solve: T = -A^-1 * L
+            const result = math.multiply(math.multiply(math.inv(A), LoadVec), -1);
+            const forces = result._data.slice(0, M).map(r => r[0]);
+
+            // Calculate Failure (Buckling)
+            let maxW = Infinity, critM = -1;
+            forces.forEach((f, i) => {
+                if (f < -0.001) { // Compression
+                    const Pc = C_FIT * Math.pow(L_O / lengths[i], ALPHA);
+                    const failureW = Math.abs(Pc / (f / loadValue));
+                    if (failureW < maxW) { maxW = failureW; critM = i; }
+                }
+            });
+
+            // Calculate Cost
+            const totalLen = lengths.reduce((a, b) => a + b, 0);
+            const totalCost = (totalLen * COST_PER_INCH) + (J * COST_PER_JOINT);
+
+            // Update UI
+            document.getElementById('hud-max-load').innerText = maxW.toFixed(2) + " oz";
+            document.getElementById('hud-crit-mem').innerText = "Member " + members[critM].id;
+            document.getElementById('hud-cost').innerText = "$" + totalCost.toFixed(2);
+
+            draw(forces, critM);
+
+        } catch (e) {
+            alert("Analysis Error: " + e.message);
+        }
+    }
+
+    // --- Rendering Engine ---
+    const canvas = document.getElementById('trussCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function draw(forces = [], critIdx = -1) {
+        const w = canvas.width = canvas.parentElement.clientWidth;
+        const h = canvas.height = canvas.parentElement.clientHeight;
+        ctx.clearRect(0,0,w,h);
+
+        if (!joints.length) return;
+
+        // Auto-scale logic
+        const scale = 20, ox = 100, oy = h - 100;
+        const getP = (j) => ({ x: ox + j.x * scale, y: oy - j.y * scale });
+
+        // Draw Members
+        members.forEach((m, i) => {
+            const j1 = joints.find(j => j.id === m.j1);
+            const j2 = joints.find(j => j.id === m.j2);
+            if (!j1 || !j2) return;
+            
+            const p1 = getP(j1), p2 = getP(j2);
+            
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            
+            if (i === critIdx) { 
+                ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 6; 
+            } else if (forces.length) {
+                if (forces[i] > 0.1) { ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3; } // Tension
+                else if (forces[i] < -0.1) { ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3; } // Compression
+                else { ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; }
+            } else {
+                ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
+            }
+            ctx.stroke();
+        });
+
+        // Draw Joints
+        joints.forEach(j => {
+            const p = getP(j);
+            const isPin = j.id == document.getElementById('pin-select').value;
+            const isRoll = j.id == document.getElementById('roller-select').value;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+            if (isPin) ctx.fillStyle = '#ef4444';
+            else if (isRoll) ctx.fillStyle = '#10b981';
+            else ctx.fillStyle = '#f8fafc';
+            ctx.fill();
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = "12px sans-serif";
+            ctx.fillText(`J${j.id}`, p.x + 10, p.y - 10);
+        });
+    }
+
+    // Canvas Interaction (Click to add joints)
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const rawX = (e.clientX - rect.left - 100) / 20;
+        const rawY = (canvas.height - (e.clientY - rect.top) - 100) / 20;
+        
+        // Snap to grid
+        const x = Math.round(rawX);
+        const y = Math.max(0, Math.round(rawY));
+
+        const id = joints.length ? Math.max(...joints.map(j => j.id)) + 1 : 1;
+        joints.push({ id, x, y });
+        updateUILists();
+    });
+
+    window.onload = updateUILists;
 </script>
 </body>
 </html>
