@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EK301 Truss Design Project</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>EK301 Truss</h1>
+                <p class="subtitle">Analysis & Design Tool</p>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <h3>Verification Projects</h3>
+                    <button class="nav-item" data-project="easy">Easy Triangle</button>
+                    <button class="nav-item" data-project="medium">Medium Truss</button>
+                    <button class="nav-item" data-project="challenge">Challenge Truss</button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Preliminary Designs</h3>
+                    <button class="nav-item" data-project="design1">Design 1</button>
+                    <button class="nav-item" data-project="design2">Design 2</button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Documentation</h3>
+                    <button class="nav-item" data-view="overview">Overview</button>
+                    <button class="nav-item" data-view="method">Method</button>
+                    <button class="nav-item" data-view="formulas">Formulas</button>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="team-info">
+                    <input type="text" id="teamName" placeholder="Team Name" class="input-field">
+                    <input type="text" id="sectionInfo" placeholder="Section (e.g., A1)" class="input-field">
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="header-content">
+                    <h2 id="pageTitle">Truss Analysis</h2>
+                    <div class="header-controls">
+                        <div class="toggle-group">
+                            <span class="toggle-label">Analysis Mode:</span>
+                            <button id="matrixModeBtn" class="mode-btn active">Matrix Method</button>
+                            <button id="jointsModeBtn" class="mode-btn">Method of Joints</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Overview View -->
+            <section id="overviewView" class="content-view">
+                <div class="card">
+                    <h3>Project Overview</h3>
+                    <p>This tool helps you analyze and design trusses for the EK301 project. The goal is to design a truss capable of supporting a given load while minimizing cost.</p>
+                    
+                    <h4>Key Assumptions</h4>
+                    <ul>
+                        <li>Structure is modeled as a pin-jointed 2D truss</li>
+                        <li>Tensile strength of members is practically infinite</li>
+                        <li>Joint strength is practically infinite</li>
+                        <li>Dominant failure mechanism is buckling of compression members</li>
+                    </ul>
+
+                    <h4>Design Specifications</h4>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <strong>Joint-to-joint span:</strong>
+                            <span>6–14 inches</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>Truss span:</strong>
+                            <span>26–30 inches</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>Load to pin (horizontal):</strong>
+                            <span>9–11 inches</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>Vertical offset (Δy):</strong>
+                            <span>0–2 inches</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>Minimum load:</strong>
+                            <span>32 oz (2 lb)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Workflow</h3>
+                    <div class="workflow-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Select a Project</h4>
+                                <p>Choose from verification cases or preliminary designs</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Review Geometry</h4>
+                                <p>Examine joint locations, member connections, and support conditions</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Analyze</h4>
+                                <p>View matrix assembly or method of joints equations</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Review Results</h4>
+                                <p>Check member forces, critical member, cost, and load capacity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Method View -->
+            <section id="methodView" class="content-view" style="display: none;">
+                <div class="card">
+                    <h3>Analysis Method</h3>
+                    <p>The truss analysis uses equilibrium equations at each joint to solve for unknown member forces and support reactions.</p>
+
+                    <h4>Matrix Approach</h4>
+                    <p>The system can be expressed as:</p>
+                    <div class="math-display">
+                        $$\mathbf{A} \cdot \mathbf{T} + \mathbf{L} = \mathbf{0}$$
+                    </div>
+                    <p>Where:</p>
+                    <ul>
+                        <li><strong>A</strong> is the equilibrium matrix (2J × M+3)</li>
+                        <li><strong>T</strong> is the unknown force vector (member tensions and reactions)</li>
+                        <li><strong>L</strong> is the known load vector</li>
+                    </ul>
+                    
+                    <p>Solving for unknowns:</p>
+                    <div class="math-display">
+                        $$\mathbf{T} = -\mathbf{A}^{-1} \mathbf{L}$$
+                    </div>
+
+                    <h4>Linearity Principle</h4>
+                    <p>Member forces scale linearly with applied load:</p>
+                    <div class="math-display">
+                        $$T_m = R_m \times W_\ell$$
+                    </div>
+                    <p>Where \(R_m\) is independent of load magnitude.</p>
+                </div>
+
+                <div class="card">
+                    <h3>Critical Member Identification</h3>
+                    <p>The critical member is the compression member that fails at the lowest applied load.</p>
+                    
+                    <p>For each compression member:</p>
+                    <div class="math-display">
+                        $$W_{failure,m} = \frac{-P_{crit,m}}{R_m}$$
+                    </div>
+                    
+                    <p>The minimum value identifies the critical member:</p>
+                    <div class="math-display">
+                        $$W_{failure} = \min_{\{m \mid R_m < 0\}} \left( \frac{-P_{crit,m}}{R_m} \right)$$
+                    </div>
+                </div>
+            </section>
+
+            <!-- Formulas View -->
+            <section id="formulasView" class="content-view" style="display: none;">
+                <div class="card">
+                    <h3>Key Formulas</h3>
+                    
+                    <div class="formula-block">
+                        <h4>Simple Truss Relation</h4>
+                        <div class="math-display">
+                            $$M = 2J - 3$$
+                        </div>
+                        <p>Where M is the number of members and J is the number of joints.</p>
+                    </div>
+
+                    <div class="formula-block">
+                        <h4>Cost Function</h4>
+                        <div class="math-display">
+                            $$C = C_L L_{total} + C_J J$$
+                        </div>
+                        <p>Where:</p>
+                        <ul>
+                            <li>\(C_L = 1\) unit/inch</li>
+                            <li>\(C_J = 10\) units/joint</li>
+                            <li>\(L_{total}\) = total member length (inches)</li>
+                            <li>\(J\) = number of joints</li>
+                        </ul>
+                    </div>
+
+                    <div class="formula-block">
+                        <h4>Buckling Strength</h4>
+                        <div class="math-display">
+                            $$F = C \left(\frac{L_0}{L}\right)^\alpha \pm U_{fit}$$
+                        </div>
+                        <p>Spring 2026 parameters:</p>
+                        <ul>
+                            <li>\(C = 37.5\) oz (fit coefficient)</li>
+                            <li>\(L_0 = 10\) in (reference length)</li>
+                            <li>\(\alpha = 2\) (power law exponent)</li>
+                            <li>\(U_{fit} = 10\) oz (total uncertainty)</li>
+                        </ul>
+                    </div>
+
+                    <div class="formula-block">
+                        <h4>Load-to-Cost Ratio</h4>
+                        <div class="math-display">
+                            $$\text{Efficiency} = \frac{W_{failure}}{C}$$
+                        </div>
+                        <p>Units: oz/$ (higher is better)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Project View -->
+            <section id="projectView" class="content-view" style="display: none;">
+                <!-- Project Header -->
+                <div class="project-header">
+                    <h3 id="projectName">Project Name</h3>
+                    <p id="projectDescription" class="project-desc"></p>
+                </div>
+
+                <!-- Truss Diagram -->
+                <div class="card">
+                    <h4>Truss Diagram</h4>
+                    <div id="trussDiagram" class="diagram-container">
+                        <!-- SVG diagram will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Input Data Section -->
+                <div class="card">
+                    <h4>Input Configuration</h4>
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="geometry">Geometry</button>
+                        <button class="tab-btn" data-tab="supports">Supports</button>
+                        <button class="tab-btn" data-tab="loads">Loads</button>
+                        <button class="tab-btn" data-tab="parameters">Parameters</button>
+                    </div>
+
+                    <div id="geometryTab" class="tab-content active">
+                        <div class="data-section">
+                            <h5>Joint Locations</h5>
+                            <div id="jointsTable" class="data-table"></div>
+                        </div>
+                        <div class="data-section">
+                            <h5>Member Connections</h5>
+                            <div id="membersTable" class="data-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="supportsTab" class="tab-content">
+                        <div class="data-section">
+                            <h5>Support Conditions</h5>
+                            <div id="supportsTable" class="data-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="loadsTab" class="tab-content">
+                        <div class="data-section">
+                            <h5>Applied Loads</h5>
+                            <div id="loadsTable" class="data-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="parametersTab" class="tab-content">
+                        <div class="param-grid">
+                            <div class="param-item">
+                                <label>Applied Load (oz)</label>
+                                <input type="number" id="appliedLoad" class="param-input" value="30">
+                            </div>
+                            <div class="param-item">
+                                <label>C (buckling coefficient)</label>
+                                <input type="number" id="bucklingC" class="param-input" value="37.5" step="0.1">
+                            </div>
+                            <div class="param-item">
+                                <label>α (power law exponent)</label>
+                                <input type="number" id="bucklingAlpha" class="param-input" value="2" step="0.1">
+                            </div>
+                            <div class="param-item">
+                                <label>L₀ (reference length, in)</label>
+                                <input type="number" id="bucklingL0" class="param-input" value="10" step="0.1">
+                            </div>
+                            <div class="param-item">
+                                <label>U_fit (uncertainty, oz)</label>
+                                <input type="number" id="bucklingU" class="param-input" value="10" step="0.1">
+                            </div>
+                        </div>
+                        <button id="recalculate" class="btn-primary">Recalculate Analysis</button>
+                    </div>
+                </div>
+
+                <!-- Analysis Section -->
+                <div class="card" id="matrixAnalysis">
+                    <h4>Matrix Method Analysis</h4>
+                    
+                    <div class="analysis-subsection">
+                        <h5>Geometry Vectors</h5>
+                        <div id="geometryVectors" class="math-content"></div>
+                    </div>
+
+                    <div class="analysis-subsection">
+                        <h5>Connection Matrix C</h5>
+                        <div id="connectionMatrix" class="math-content"></div>
+                    </div>
+
+                    <div class="analysis-subsection">
+                        <h5>Support Matrices</h5>
+                        <div id="supportMatrices" class="math-content"></div>
+                    </div>
+
+                    <div class="analysis-subsection">
+                        <h5>Load Vector L</h5>
+                        <div id="loadVector" class="math-content"></div>
+                    </div>
+
+                    <div class="analysis-subsection">
+                        <h5>Equilibrium Matrix A</h5>
+                        <div id="equilibriumMatrix" class="math-content"></div>
+                        <p class="matrix-note">Dimensions: 2J × (M+3) where J = <span id="jCount"></span>, M = <span id="mCount"></span></p>
+                    </div>
+                </div>
+
+                <div class="card" id="jointsAnalysis" style="display: none;">
+                    <h4>Method of Joints Analysis</h4>
+                    <p class="analysis-intro">Force equilibrium at each joint:</p>
+                    <div id="jointsEquations" class="joints-content"></div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="card">
+                    <h4>Analysis Results</h4>
+                    
+                    <div class="results-summary">
+                        <div class="result-card">
+                            <div class="result-label">Maximum Load</div>
+                            <div class="result-value" id="maxLoad">--</div>
+                            <div class="result-unit">oz</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Truss Cost</div>
+                            <div class="result-value" id="trussCost">--</div>
+                            <div class="result-unit">units</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Load/Cost Ratio</div>
+                            <div class="result-value" id="efficiency">--</div>
+                            <div class="result-unit">oz/unit</div>
+                        </div>
+                        <div class="result-card critical">
+                            <div class="result-label">Critical Member</div>
+                            <div class="result-value" id="criticalMember">--</div>
+                            <div class="result-unit"></div>
+                        </div>
+                    </div>
+
+                    <div class="results-table-section">
+                        <h5>Member Forces</h5>
+                        <div id="memberForcesTable" class="results-table"></div>
+                    </div>
+
+                    <div class="results-table-section">
+                        <h5>Reaction Forces</h5>
+                        <div id="reactionForcesTable" class="results-table"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
