@@ -18,39 +18,38 @@
 'use strict';
 
 /* ──────────────────────────────────────────────────────────────
-   1.  PRESET TRUSS DATA
+   1.  PRESET TRUSS DATA (UPDATED FOR EK301 LENGTH CONSTRAINTS)
    ────────────────────────────────────────────────────────────── */
 
 const PRESETS = [
   {
-    name: 'Truss 1: Triangle',
-    subtitle: '3 Joints · 3 Members  (Easy Verification)',
-    joints:  [[0,0],[15,2],[30,0]],          // 0-indexed
-    members: [[0,1],[1,2],[0,2]],
+    name: 'Truss 1: Small Pratt',
+    subtitle: '5 Joints · 7 Members  (Compliant Span: 28in)',
+    joints:  [[0,0], [14,0], [28,0], [7,10], [21,10]],          
+    members: [[0,1], [1,2], [0,3], [1,3], [1,4], [2,4], [3,4]],
     pinJoint:    0,   // J1
     rollerJoint: 2,   // J3
     loadJoint:   1,   // J2
     W: 32             // oz
   },
   {
-    name: 'Truss 2: Pratt Style',
-    subtitle: '5 Joints · 7 Members  (Medium Verification)',
-    joints:  [[0,0],[10,0],[15,2],[20,0],[30,0]],
-    members: [[0,1],[1,3],[3,4],[0,2],[2,4],[1,2],[2,3]],
+    name: 'Truss 2: Warren Full',
+    subtitle: '7 Joints · 11 Members  (Compliant Span: 30in)',
+    joints:  [[0,0], [10,0], [20,0], [30,0], [5,8.66], [15,8.66], [25,8.66]],
+    members: [[0,1], [1,2], [2,3], [4,5], [5,6], [0,4], [1,4], [1,5], [2,5], [2,6], [3,6]],
     pinJoint:    0,   // J1
-    rollerJoint: 4,   // J5
+    rollerJoint: 3,   // J4
     loadJoint:   2,   // J3
     W: 32
   },
   {
-    name: 'Truss 3: Warren Full',
-    subtitle: '7 Joints · 11 Members  (Challenge Verification)',
-    joints:  [[0,0],[10,0],[20,0],[30,0],[5,2],[15,2],[25,2]],
-    members: [[0,1],[1,2],[2,3],[4,5],[5,6],          // bottom + top chords
-               [0,4],[4,1],[1,5],[5,2],[2,6],[6,3]],  // diagonals
+    name: 'Truss 3: Warren Standard',
+    subtitle: '5 Joints · 7 Members  (Compliant Span: 26in)',
+    joints:  [[0,0], [13,0], [26,0], [6.5,11], [19.5,11]],
+    members: [[0,1], [1,2], [0,3], [1,3], [1,4], [2,4], [3,4]],
     pinJoint:    0,   // J1
-    rollerJoint: 3,   // J4
-    loadJoint:   5,   // J6
+    rollerJoint: 2,   // J3
+    loadJoint:   1,   // J2
     W: 32
   }
 ];
@@ -473,7 +472,6 @@ function renderForcesTable(res) {
   });
 
   tbody.innerHTML = html;
-  // Re-typeset the reaction spans with MathJax
   scheduleTypeset(document.querySelector('.rxn-box'));
 }
 
@@ -565,6 +563,8 @@ function renderMat(matrix, rowLbls, colLbls) {
    8.  MATH STEPS (Step-by-step derivation, LaTeX via MathJax)
    ────────────────────────────────────────────────────────────── */
 
+let stepCounter = 0;
+
 function renderMathSteps(res) {
   const container = document.getElementById('math-steps');
   container.innerHTML = buildAllSteps(res);
@@ -574,40 +574,6 @@ function renderMathSteps(res) {
   scheduleTypeset(container);
 }
 
-function buildAllSteps(res) {
-  return [
-    step1_validity(res),
-    step2_joints(res),
-    step3_lengths(res),
-    step4_C(res),
-    step5_Sxy(res),
-    step6_L(res),
-    step7_A(res),
-    step8_solve(res),
-    step9_forces(res),
-    step10_buckling(res),
-    step11_critical(res),
-    step12_cost(res)
-  ].join('');
-}
-
-let stepCounter = 0;
-function makeStep(title, badge, body) {
-  stepCounter++;
-  const id = 'step-' + stepCounter;
-  return `
-  <div class="math-step">
-    <div class="step-header" onclick="toggleStep('${id}')">
-      <span class="step-num">Step ${stepCounter}</span>
-      <span class="step-title">${title}</span>
-      ${badge ? `<span class="badge" style="background:${badge.bg};color:${badge.col}">${badge.text}</span>` : ''}
-      <span class="step-chev" id="chev-${id}">▼</span>
-    </div>
-    <div class="step-body" id="${id}">${body}</div>
-  </div>`;
-}
-
-/* Before calling buildAllSteps, reset counter */
 function buildAllSteps(res) {
   stepCounter = 0;
   return [
@@ -624,6 +590,21 @@ function buildAllSteps(res) {
     step11_critical(res),
     step12_cost(res)
   ].join('');
+}
+
+function makeStep(title, badge, body) {
+  stepCounter++;
+  const id = 'step-' + stepCounter;
+  return `
+  <div class="math-step">
+    <div class="step-header" onclick="toggleStep('${id}')">
+      <span class="step-num">Step ${stepCounter}</span>
+      <span class="step-title">${title}</span>
+      ${badge ? `<span class="badge" style="background:${badge.bg};color:${badge.col}">${badge.text}</span>` : ''}
+      <span class="step-chev" id="chev-${id}">▼</span>
+    </div>
+    <div class="step-body" id="${id}">${body}</div>
+  </div>`;
 }
 
 /* ── Step 1: Validity ── */
@@ -1066,15 +1047,15 @@ function switchCTab(tab) {
    ────────────────────────────────────────────────────────────── */
 
 function initCustomForm() {
-  const J = parseInt(document.getElementById('cJ').value) || 3;
-  const M = parseInt(document.getElementById('cM').value) || 3;
+  const J = parseInt(document.getElementById('cJ').value) || 5;
+  const M = parseInt(document.getElementById('cM').value) || 7;
   let html = '';
 
   html += '<div class="cform-section"><h4>Joint Coordinates</h4><div class="cform-grid">';
   for (let j = 1; j <= J; j++) {
     html += `<div class="fg">
       <label>J${j}: x (in)</label>
-      <input type="number" id="jx${j}" value="${(j-1)*15/(J-1||1)}" step="0.1">
+      <input type="number" id="jx${j}" value="${(j-1)*28/(J-1||1)}" step="0.1">
     </div>
     <div class="fg">
       <label>J${j}: y (in)</label>
@@ -1113,8 +1094,8 @@ function initCustomForm() {
 }
 
 function solveCustomInteractive() {
-  const J = parseInt(document.getElementById('cJ').value) || 3;
-  const M = parseInt(document.getElementById('cM').value) || 3;
+  const J = parseInt(document.getElementById('cJ').value) || 5;
+  const M = parseInt(document.getElementById('cM').value) || 7;
   const errDiv = document.getElementById('cform-err');
   errDiv.style.display = 'none';
 
@@ -1193,6 +1174,11 @@ function solveFromMatrix() {
     const rollerJoint = parseInt(document.getElementById('mi-roller').value) - 1;
     const loadJoint   = parseInt(document.getElementById('mi-lj').value)     - 1;
     const W           = parseFloat(document.getElementById('mi-W').value);
+
+    // Validate to ensure they aren't out of bounds before building the matrix
+    if (pinJoint < 0 || rollerJoint < 0 || loadJoint < 0) {
+        throw new Error("Joint indices must be 1 or greater.");
+    }
 
     const t = { name:'Matrix Input Truss', subtitle:'From matrix definition', joints, members, pinJoint, rollerJoint, loadJoint, W };
     const res = solveTruss(t);
@@ -1288,5 +1274,5 @@ function scheduleTypeset(el) {
 document.addEventListener('DOMContentLoaded', () => {
   initCanvasEvents();
   initCustomForm();   // pre-populate the form
-  loadPreset(0);      // load the triangle truss by default
+  loadPreset(0);      // load the small pratt truss by default
 });
