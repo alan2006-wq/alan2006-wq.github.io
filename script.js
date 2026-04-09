@@ -1545,34 +1545,32 @@ function exportTeamA3Report() {
   const trussCost = 319;
   const loadCostRatio = 0.0031;
 
-  // 2. Format the text exactly as required by the assignment rubric
-  let textContent = `\\% EK301, Section A1, Group ${groupNum}: Alan Bonilla Santos, Isabella Peraldo, Tayler Christian, 4/8/2026.\n`;
-  textContent += `Load: ${load_oz} oz\n`;
-  textContent += `Member forces in oz\n`;
-  
-  // (You will eventually want to use a 'for' loop here to print all your members automatically)
-  textContent += `m1: ${m1_val} (${m1_type})\n`;
-  textContent += `m2: ${m2_val} (${m2_type})\n`;
-  textContent += `. . .\n`; 
-  textContent += `m15: ${m15_val} (${m15_type})\n`;
-  
-  textContent += `Reaction forces in oz:\n`;
-  textContent += `Sx1: ${Sx1}\n`;
-  textContent += `Sy1: ${Sy1}\n`;
-  textContent += `Sy2: ${Sy2}\n`;
-  textContent += `Cost of truss: $${trussCost}\n`;
-  textContent += `Theoretical max load/cost ratio in oz/$: ${loadCostRatio}\n`;
+// Replace the bottom half of your exportTeamA3Report function with this:
 
-  // 3. Turn that text into a downloadable file
+  let textContent = `fprintf('\\%% EK301, Section A1, Group ${groupNum}: Alan Bonilla Santos, Isabella Peraldo, Tayler Christian, 4/8/2026.\\n');\n`;
+  textContent += `fprintf('Load: ${load_oz} oz\\n');\n`;
+  textContent += `fprintf('Member forces in oz\\n');\n`;
+  textContent += `fprintf('m1: ${m1_val} (${m1_type})\\n');\n`;
+  textContent += `fprintf('m2: ${m2_val} (${m2_type})\\n');\n`;
+  textContent += `fprintf('. . .\\n');\n`;
+  textContent += `fprintf('m15: ${m15_val} (${m15_type})\\n');\n`;
+  textContent += `fprintf('Reaction forces in oz:\\n');\n`;
+  textContent += `fprintf('Sx1: ${Sx1}\\n');\n`;
+  textContent += `fprintf('Sy1: ${Sy1}\\n');\n`;
+  textContent += `fprintf('Sy2: ${Sy2}\\n');\n`;
+  textContent += `fprintf('Cost of truss: $${trussCost}\\n');\n`;
+  textContent += `fprintf('Theoretical max load/cost ratio in oz/$: ${loadCostRatio}\\n');\n`;
+
   const blob = new Blob([textContent], { type: 'text/plain' });
-  
-  // 4. Create the link and force the download strictly as a .mat file
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `Team_A3_Group_${groupNum}_Truss_Report.mat`; // Fixed to .mat format!
   
-  // 5. Trigger the download
+  // Notice the .m extension! This makes it a runnable MATLAB script.
+  link.download = `Team_A3_Group_${groupNum}_Truss_Report.m`; 
+  
   document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
   link.click();
   document.body.removeChild(link);
 }
