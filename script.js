@@ -1,7 +1,7 @@
 /* ================================================================
    EK301 Truss Analyzer  —  script.js
    Boston University  ·  Engineering Mechanics  ·  Spring 2026
-   ================================================================
+   ================================================================ 
 
    Algorithm follows EK301 Project 2 document (Section 2.4):
      Eq.(1)  M = 2J − 3
