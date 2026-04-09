@@ -252,18 +252,18 @@
 0 0 1 1 0 0 1
 0 0 0 0 1 1 1</textarea>
         </div>
-        <div class="inline-form" style="flex-wrap:wrap;gap:.6rem">
-          <label>Pin joint #:</label>
-          <input type="number" id="mi-pin" value="1" min="1" class="num-in">
-          <label>Roller joint #:</label>
-          <input type="number" id="mi-roller" value="3" min="1" class="num-in">
-          <label>Load joint #:</label>
-          <input type="number" id="mi-lj" value="2" min="1" class="num-in">
-          <label>W (oz):</label>
-          <input type="number" id="mi-W" value="32" class="num-in" style="width:70px">
-          <button class="btn btn-primary" onclick="solveFromMatrix()">Analyze</button>
-          <button class="btn" style="background:#10b981; color:white; border-color:#10b981" onclick="exportToMatlab()">Download .mat File</button>
-        </div>
+<div class="inline-form" style="flex-wrap:wrap;gap:.6rem">
+    <label>Pin joint #:</label>
+    <input type="number" id="mi-pin" value="1" min="1" class="num-in">
+    <label>Roller joint #:</label>
+    <input type="number" id="mi-roller" value="3" min="1" class="num-in">
+    <label>Load joint #:</label>
+    <input type="number" id="mi-lj" value="2" min="1" class="num-in">
+    <label>W (oz):</label>
+    <input type="number" id="mi-W" value="32" class="num-in" style="width:70px">
+    <button class="btn btn-primary" onclick="solveFromMatrix()">Analyze</button>
+    <button class="btn" style="background:#10b981; color:white; border-color:#10b981" onclick="exportToMatlab()">Download .mat File</button>
+</div>
         <div id="mi-error" class="err-msg" style="display:none"></div>
       </div>
     </div>
