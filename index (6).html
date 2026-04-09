@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EK301 Truss Analyzer — Boston University</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+            startup: { typeset: false }
+        };
+    </script>
+    <script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <svg class="header-icon" viewBox="0 0 60 40" fill="none">
+            <line x1="2" y1="38" x2="58" y2="38" stroke="#60a5fa" stroke-width="2.5"/>
+            <line x1="2" y1="38" x2="30" y2="6"  stroke="#60a5fa" stroke-width="2.5"/>
+            <line x1="30" y1="6" x2="58" y2="38" stroke="#60a5fa" stroke-width="2.5"/>
+            <line x1="2"  y1="38" x2="19" y2="38" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="0"/>
+            <line x1="19" y1="38" x2="30" y2="6"  stroke="#93c5fd" stroke-width="1.5"/>
+            <line x1="30" y1="6"  x2="41" y2="38" stroke="#93c5fd" stroke-width="1.5"/>
+            <circle cx="2"  cy="38" r="3" fill="#3b82f6"/>
+            <circle cx="30" cy="6"  r="3" fill="#f97316"/>
+            <circle cx="58" cy="38" r="3" fill="#8b5cf6"/>
+        </svg>
+        <div>
+            <h1>EK301 Truss Analyzer</h1>
+            <p>Boston University · Engineering Mechanics · Method of Joints</p>
+        </div>
+    </div>
+</header>
+
+<main>
+
+<div class="container">
+  <section class="card">
+    <h2 class="card-title">Select a Built-in Truss</h2>
+    <p class="card-sub">Click any truss below to load it instantly — full analysis and math shown automatically.</p>
+    <div class="preset-row">
+
+      <button class="preset-btn active" id="pb-0" onclick="loadPreset(0)">
+        <svg viewBox="0 0 120 70" class="mini-svg">
+          <line x1="10" y1="60" x2="60" y2="60" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="60" y1="60" x2="110" y2="60" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="10" y1="60" x2="35" y2="14" stroke="#ef4444" stroke-width="2.5"/>
+          <line x1="35" y1="14" x2="85" y2="14" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="85" y1="14" x2="110" y2="60" stroke="#ef4444" stroke-width="2.5"/>
+          <line x1="35" y1="14" x2="60" y2="60" stroke="#94a3b8" stroke-width="2"/>
+          <line x1="85" y1="14" x2="60" y2="60" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="10"  cy="60" r="4" fill="#3b82f6"/>
+          <circle cx="60"  cy="60" r="4" fill="#f97316"/>
+          <circle cx="110" cy="60" r="4" fill="#8b5cf6"/>
+        </svg>
+        <div class="pb-info">
+          <span class="pb-name">Truss 1: Small Pratt</span>
+          <span class="pb-desc">5 Joints · 7 Members</span>
+          <span class="badge easy">Compliant</span>
+        </div>
+      </button>
+
+      <button class="preset-btn" id="pb-1" onclick="loadPreset(1)">
+        <svg viewBox="0 0 120 70" class="mini-svg">
+          <line x1="10" y1="60" x2="40" y2="60" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="40" y1="60" x2="70" y2="60" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="70" y1="60" x2="110" y2="60" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="10" y1="60" x2="60" y2="14" stroke="#ef4444" stroke-width="2.5"/>
+          <line x1="60" y1="14" x2="110" y2="60" stroke="#ef4444" stroke-width="2.5"/>
+          <line x1="40" y1="60" x2="60" y2="14" stroke="#94a3b8" stroke-width="2"/>
+          <line x1="60" y1="14" x2="70" y2="60" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="10"  cy="60" r="4" fill="#3b82f6"/>
+          <circle cx="60"  cy="14" r="4" fill="#f97316"/>
+          <circle cx="110" cy="60" r="4" fill="#8b5cf6"/>
+        </svg>
+        <div class="pb-info">
+          <span class="pb-name">Truss 2: Warren Full</span>
+          <span class="pb-desc">7 Joints · 11 Members</span>
+          <span class="badge medium">Compliant</span>
+        </div>
+      </button>
+
+      <button class="preset-btn" id="pb-2" onclick="loadPreset(2)">
+        <svg viewBox="0 0 120 70" class="mini-svg">
+          <line x1="5"  y1="60" x2="40"  y2="60" stroke="#10b981" stroke-width="2"/>
+          <line x1="40" y1="60" x2="80"  y2="60" stroke="#10b981" stroke-width="2.5"/>
+          <line x1="80" y1="60" x2="115" y2="60" stroke="#10b981" stroke-width="2"/>
+          <line x1="22" y1="16" x2="60" y2="16" stroke="#ef4444" stroke-width="2"/>
+          <line x1="60" y1="16" x2="98" y2="16" stroke="#ef4444" stroke-width="2"/>
+          <line x1="5"  y1="60" x2="22" y2="16" stroke="#ef4444" stroke-width="2"/>
+          <line x1="22" y1="16" x2="40" y2="60" stroke="#10b981" stroke-width="2"/>
+          <line x1="40" y1="60" x2="60" y2="16" stroke="#ef4444" stroke-width="2"/>
+          <line x1="60" y1="16" x2="80" y2="60" stroke="#ef4444" stroke-width="2"/>
+          <line x1="80" y1="60" x2="98" y2="16" stroke="#10b981" stroke-width="2"/>
+          <line x1="98" y1="16" x2="115" y2="60" stroke="#ef4444" stroke-width="2"/>
+          <circle cx="5"   cy="60" r="3" fill="#3b82f6"/>
+          <circle cx="60"  cy="16" r="3" fill="#f97316"/>
+          <circle cx="115" cy="60" r="3" fill="#8b5cf6"/>
+        </svg>
+        <div class="pb-info">
+          <span class="pb-name">Truss 3: Warren Standard</span>
+          <span class="pb-desc">5 Joints · 7 Members</span>
+          <span class="badge hard">Compliant</span>
+        </div>
+      </button>
+
+    </div>
+  </section>
+</div>
+
+<div class="container">
+  <section class="card">
+
+    <div class="analysis-header">
+      <div>
+        <h2 class="card-title" id="an-title">Truss Analysis</h2>
+        <p class="card-sub" id="an-sub">Select a truss above to begin.</p>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="vb-visual" onclick="setView('visual')">🔍 Visual</button>
+        <button class="view-btn" id="vb-matrix" onclick="setView('matrix')">⊞ Matrices</button>
+      </div>
+    </div>
+
+    <div class="analysis-body">
+
+      <div class="left-col">
+        <div id="visual-panel">
+          <canvas id="trussCanvas" width="660" height="320"></canvas>
+          <div class="legend">
+            <span class="lg"><span class="dot" style="background:#10b981"></span>Tension (T)</span>
+            <span class="lg"><span class="dot" style="background:#ef4444"></span>Compression (C)</span>
+            <span class="lg"><span class="dot" style="background:#94a3b8"></span>Zero Force</span>
+            <span class="lg"><span class="dot crit-dot"></span>★ Critical</span>
+            <span class="lg"><span class="dot" style="background:#3b82f6"></span>Pin</span>
+            <span class="lg"><span class="dot" style="background:#8b5cf6"></span>Roller</span>
+            <span class="lg"><span class="dot" style="background:#f97316"></span>Load Joint</span>
+          </div>
+          <div id="hover-tip" class="hover-tip" style="display:none"></div>
+        </div>
+        <div id="matrix-panel" style="display:none">
+          <div id="matrix-display"></div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <h3 class="panel-h">Results Summary</h3>
+
+        <div class="metric-grid">
+          <div class="metric-card blue">
+            <div class="ml">Max Failure Load</div>
+            <div class="mv" id="m-wfail">—</div>
+            <div class="mu">oz</div>
+          </div>
+          <div class="metric-card amber">
+            <div class="ml">Uncertainty ΔW</div>
+            <div class="mv" id="m-dw">—</div>
+            <div class="mu">oz</div>
+          </div>
+          <div class="metric-card gray">
+            <div class="ml">Truss Cost</div>
+            <div class="mv" id="m-cost">—</div>
+            <div class="mu">units</div>
+          </div>
+          <div class="metric-card green">
+            <div class="ml">Load / Cost</div>
+            <div class="mv" id="m-ratio">—</div>
+            <div class="mu">oz/unit</div>
+          </div>
+        </div>
+
+        <div class="rxn-box">
+          <h4>Reaction Forces</h4>
+          <div class="rxn-row"><span>$R_{Px}$</span><span id="rxn-rpx">—</span><span>oz</span></div>
+          <div class="rxn-row"><span>$R_{Py}$</span><span id="rxn-rpy">—</span><span>oz</span></div>
+          <div class="rxn-row"><span>$R_{Ry}$</span><span id="rxn-rry">—</span><span>oz</span></div>
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="ftable">
+            <thead>
+              <tr>
+                <th>Mbr</th><th>Joints</th><th>L (in)</th>
+                <th>Force (oz)</th><th>T/C</th>
+                <th>P<sub>crit</sub></th><th>W<sub>fail</sub></th>
+              </tr>
+            </thead>
+            <tbody id="ftbody">
+              <tr><td colspan="7" class="placeholder">Select a truss to view results</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="container">
+  <section class="card">
+    <h2 class="card-title">📐 Step-by-Step Mathematical Derivation</h2>
+    <p class="card-sub">
+      Complete method-of-joints analysis following EK301 Section 2.4 — no steps skipped.
+      Each accordion section corresponds to one algorithmic step.
+    </p>
+    <div id="math-steps">
+      <p class="placeholder" style="padding:2rem 0">Load a truss above to generate the full derivation.</p>
+    </div>
+  </section>
+</div>
+
+<div class="container">
+  <section class="card">
+    <h2 class="card-title">✏️ Custom Truss Input</h2>
+    <p class="card-sub">Enter your own truss geometry and get a full analysis.</p>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="ctab-form" onclick="switchCTab('form')">Interactive Form</button>
+      <button class="tab-btn" id="ctab-mat"  onclick="switchCTab('mat')">Matrix Input</button>
+    </div>
+
+    <div id="cpanel-form">
+      <div class="inline-form">
+        <label>Number of Joints (J):</label>
+        <input type="number" id="cJ" value="5" min="3" max="20" class="num-in">
+        <label>Number of Members (M):</label>
+        <input type="number" id="cM" value="7" min="3" max="40" class="num-in">
+        <button class="btn" onclick="initCustomForm()">Initialize</button>
+      </div>
+      <div id="cform-body"></div>
+    </div>
+
+    <div id="cpanel-mat" style="display:none">
+      <div class="matrix-input-grid">
+        <div class="fg">
+          <label>X — joint x-coords (comma separated):</label>
+          <input type="text" id="mi-X" value="0, 14, 28, 7, 21" class="wide-in">
+        </div>
+        <div class="fg">
+          <label>Y — joint y-coords (comma separated):</label>
+          <input type="text" id="mi-Y" value="0, 0, 0, 10, 10" class="wide-in">
+        </div>
+        <div class="fg">
+          <label>C — connection matrix (rows by newline, entries by space):</label>
+          <textarea id="mi-C" rows="5" class="wide-in">1 0 1 0 0 0 0
+1 1 0 1 1 0 0
+0 1 0 0 0 1 0
+0 0 1 1 0 0 1
+0 0 0 0 1 1 1</textarea>
+        </div>
+        <div class="inline-form" style="flex-wrap:wrap;gap:.6rem">
+          <label>Pin joint #:</label>
+          <input type="number" id="mi-pin" value="1" min="1" class="num-in">
+          <label>Roller joint #:</label>
+          <input type="number" id="mi-roller" value="3" min="1" class="num-in">
+          <label>Load joint #:</label>
+          <input type="number" id="mi-lj" value="2" min="1" class="num-in">
+          <label>W (oz):</label>
+          <input type="number" id="mi-W" value="32" class="num-in" style="width:70px">
+          <button class="btn btn-primary" onclick="solveFromMatrix()">Analyze</button>
+        </div>
+        <div id="mi-error" class="err-msg" style="display:none"></div>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+</main>
+
+<footer class="site-footer">
+  <p><strong>EK301 Truss Analyzer</strong> — Boston University · College of Engineering · Spring 2026</p>
+  <p>Method of Joints · Equilibrium Matrix Method · Euler Buckling Analysis</p>
+  <p class="footer-params">
+    Buckling: $C_\text{fit}=37.5$ oz, $L_0=10$ in, $\alpha=2$, $U_\text{fit}=10$ oz &nbsp;|&nbsp;
+    Cost: $C = L_\text{total} + 10J$
+  </p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
